@@ -5,9 +5,9 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlID;
 import jakarta.xml.bind.annotation.XmlIDREF;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Linea {
-    @XmlIDREF
+
     private Medicamento medicamento;
     private int cantidad;
     private String indicaciones;

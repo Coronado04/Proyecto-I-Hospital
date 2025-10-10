@@ -12,12 +12,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Paciente {
-    @XmlID
+
     private String id;
     private String nombre;
-    @XmlJavaTypeAdapter(value=LocalDateAdapter.class)
+
     private LocalDate fechaNacimiento;
 
     private String numero;

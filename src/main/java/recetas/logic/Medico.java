@@ -5,9 +5,9 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlID;
 import java.util.Objects;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Medico {
-    @XmlID
+
     private String id;
     private String clave;
     private String nombre;

@@ -1,8 +1,5 @@
 package recetas.logic;
 
-import recetas.data.Data;
-import recetas.data.XmlPersister;
-
 public class Sesion {
     private static Usuario usuario;
 

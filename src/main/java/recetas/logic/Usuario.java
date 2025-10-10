@@ -4,9 +4,8 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlID;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Usuario {
-    @XmlID
     protected String id;
     protected String nombre;
     protected String clave;

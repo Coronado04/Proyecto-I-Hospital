@@ -1,8 +1,5 @@
 package recetas.logic;
 
-import recetas.data.Data;
-import recetas.data.XmlPersister;
-
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;

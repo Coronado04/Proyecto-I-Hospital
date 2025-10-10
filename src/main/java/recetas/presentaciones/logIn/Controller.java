@@ -1,7 +1,5 @@
 package recetas.presentaciones.logIn;
 
-import recetas.data.Data;
-import recetas.data.XmlPersister;
 import recetas.logic.Sesion;
 import recetas.logic.Usuario;
 import recetas.logic.Medico;

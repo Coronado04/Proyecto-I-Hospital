@@ -8,25 +8,20 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Receta {
 
     public enum Estado { CONFECCIONADA, PROCESO, LISTA, ENTREGADA }
-    @XmlID
+
     private String idReceta;
-    @XmlIDREF
+
     private Medico medico;
 
-    @XmlIDREF
     private Paciente paciente;
 
-    @XmlElement(name="detalle")
     private List<Linea> detalles = new ArrayList<>();
 
-    @XmlJavaTypeAdapter(LocalDateAdapter.class)
     private LocalDate fechaConfeccion;
 
-    @XmlJavaTypeAdapter(LocalDateAdapter.class)
     private LocalDate fechaRetiro;
 
     private Estado estado;
