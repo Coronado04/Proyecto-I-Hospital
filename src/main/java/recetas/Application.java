@@ -22,6 +22,7 @@ import java.awt.event.WindowEvent;
 //Sebastian Trejos Artavia 402630787
 //Kevin López Guerrero 118890906
 //Luis Coronado Benavides 402660049
+//Segunda Parte del proyecto
 
 public class Application {
 
