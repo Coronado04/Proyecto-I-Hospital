@@ -1,0 +1,98 @@
+package recetas.logic;
+
+import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import recetas.data.LocalDateAdapter;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Receta {
+
+    public enum Estado { CONFECCIONADA, PROCESO, LISTA, ENTREGADA }
+    @XmlID
+    private String idReceta;
+    @XmlIDREF
+    private Medico medico;
+
+    @XmlIDREF
+    private Paciente paciente;
+
+    @XmlElement(name="detalle")
+    private List<Linea> detalles = new ArrayList<>();
+
+    @XmlJavaTypeAdapter(LocalDateAdapter.class)
+    private LocalDate fechaConfeccion;
+
+    @XmlJavaTypeAdapter(LocalDateAdapter.class)
+    private LocalDate fechaRetiro;
+
+    private Estado estado;
+
+    public Receta() {
+        idReceta = "";
+        this.detalles = new ArrayList<>();
+    }
+
+    public Receta(String idReceta, Medico medico, Paciente paciente, LocalDate fechaRetiro) {
+        this.idReceta = idReceta;
+        this.medico = medico;
+        this.paciente = paciente;
+        this.fechaConfeccion = LocalDate.now();
+        this.fechaRetiro = fechaRetiro;
+        this.estado = Estado.CONFECCIONADA;
+        this.detalles = new ArrayList<>();
+    }
+    public void agregarDetalle(Linea detalle) {
+        detalles.add(detalle);
+    }
+
+    public void eliminarDetalle(Linea detalle) {
+        detalles.remove(detalle);
+    }
+
+    public void modificarDetalle(int index, Linea nuevoDetalle) {
+        detalles.set(index, nuevoDetalle);
+    }
+
+    public String getIdReceta() { return idReceta; }
+    public Medico getMedico() { return medico; }
+    public Paciente getPaciente() { return paciente; }
+    public List<Linea> getDetalles() { return detalles; }
+    public LocalDate getFechaConfeccion() { return fechaConfeccion; }
+    public LocalDate getFechaRetiro() { return fechaRetiro; }
+    public Estado getEstado() { return estado; }
+
+    public void deleteLinea(Linea e){
+        detalles.remove(e);
+    }
+
+
+    public void setEstado(Estado estado) {
+        this.estado = estado;
+    }
+
+    @Override
+    public String toString() {
+        String nombrePaciente = (paciente != null) ? paciente.getNombre() : "Sin paciente";
+        return "Receta #" + idReceta + " - Paciente: " + nombrePaciente + " - Estado: " + estado;
+    }
+    public void setFechaConfeccion(LocalDate fechaConfeccion) {
+        this.fechaConfeccion = fechaConfeccion;
+    }
+    public void setFechaRetiro(LocalDate fechaRetiro) {
+        this.fechaRetiro = fechaRetiro;
+    }
+    public void setIdReceta(String idReceta) {
+        this.idReceta = idReceta;
+    }
+    public void setMedico(Medico medico) {
+        this.medico = medico;
+    }
+    public void setPaciente(Paciente paciente) {
+        this.paciente = paciente;
+    }
+
+}
