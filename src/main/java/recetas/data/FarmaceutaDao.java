@@ -49,6 +49,7 @@ public class FarmaceutaDao {
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1,f.getClave());
         stm.setString(2, f.getNombre());
+        stm.setString(3,f.getId());
         int count=db.executeUpdate(stm);
 //        if (count==0){
 //            throw new Exception("Farmaceuta ya existe");
