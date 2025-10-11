@@ -21,7 +21,7 @@ public class Service {
         } catch (Exception e) {
             data = new Data();
 
-            data.setAdmin(new Usuario("Administrador", "admin", "1234", "admin"));
+         //   data.setAdmin(new Usuario("Administrador", "admin", "1234", "admin"));
         }
     }
 
