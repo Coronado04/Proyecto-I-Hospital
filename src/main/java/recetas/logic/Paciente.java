@@ -1,10 +1,6 @@
 package recetas.logic;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlID;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import recetas.data.LocalDateAdapter;
 
 import java.sql.Date;

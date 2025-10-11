@@ -1,7 +1,6 @@
 package recetas.logic;
 
-import jakarta.xml.bind.annotation.*;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import recetas.data.LocalDateAdapter;
 
 import java.time.LocalDate;
