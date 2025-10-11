@@ -42,7 +42,7 @@ public class MedicoDao {
     }
 
     public void update(Medico m)throws Exception{
-        String sql="update Medico m set m.clave=?, m.nombre=?, m.especialidad=? where m.id=?";
+        String sql="update Medico set clave=?, nombre=?, especialidad=? where id=?\n";
         PreparedStatement ps = db.prepareStatement(sql);
         ps.setString(1, m.getClave());
         ps.setString(2, m.getNombre());
