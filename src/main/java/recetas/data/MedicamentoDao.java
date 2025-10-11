@@ -27,10 +27,10 @@ public class MedicamentoDao {
         }
     }
 
-    public Medicamento read(String id) throws Exception{
+    public Medicamento read(String codigo) throws Exception{
         String sql="select * from Medicamento m where m.id=?";
         PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, id);
+        stm.setString(1, codigo);
         ResultSet rs =  db.executeQuery(stm);
         Medicamento m;
         if (rs.next()) {

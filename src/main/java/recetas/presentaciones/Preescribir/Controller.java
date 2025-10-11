@@ -17,7 +17,7 @@ public class Controller {
                 Service.instance().search(new Receta()),      // lista de recetas
                 Service.instance().search(new Paciente()),    // lista de pacientes
                 Service.instance().search(new Medico()),      // lista de médicos
-                Service.instance().searchMedicamento(new Medicamento()),
+                Service.instance().search(new Medicamento()),
                 Service.instance().searchLinea(new Linea())// lista de medicamentos
 
 
@@ -93,7 +93,7 @@ public class Controller {
     }
 
     public void searchMedicamento(Medicamento filtro) throws Exception {
-        model.setMedicamentos(Service.instance().searchMedicamento(filtro));
+        model.setMedicamentos(Service.instance().search(filtro));
         model.updateModel();
     }
 
