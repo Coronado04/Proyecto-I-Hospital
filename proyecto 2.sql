@@ -42,7 +42,7 @@ ENGINE = InnoDB;
 -- Table `proyecto2`.`Receta`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Receta` (
-  `numero` INT NOT NULL,
+ `numero` INT NOT NULL AUTO_INCREMENT,
   `fechaConfeccion` DATE NULL,
   `fechaRetiro` DATE NULL,
   `estado` VARCHAR(20) NULL,
