@@ -150,12 +150,12 @@ public class Service {
     }*/
     //Falta por hacer bien este create, creo que ocupa la recetaDao
     public Linea read(Linea e) throws Exception {
-        return lineaDao.read(e.getMedicamento().getCodigo());
+        return lineaDao.read(e.getNumero());
     }
 
 
     public void delete(Linea e) throws Exception {
-        lineaDao.delete(e.getMedicamento().getCodigo());
+        lineaDao.delete(e.getNumero());
     }
 
     public List<Linea> search(Linea e) {

@@ -74,12 +74,6 @@ public class Controller {
         return model.getCurrentLinea();
     }
 
-
-
-
-
-
-
     // --- Limpiar receta actual ---
     public void clearReceta() {
         model.setCurrentReceta(new Receta());

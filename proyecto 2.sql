@@ -78,17 +78,28 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Linea`
 -- -----------------------------------------------------
-CREATE TABLE `Linea` (
-    `numero` VARCHAR(10) NOT NULL,
-    `cantidad` INT,
-    `indicaciones` VARCHAR(45),
-    `duracionDias` INT,
+CREATE TABLE IF NOT EXISTS `Linea` (
+ `numero` INT NOT NULL AUTO_INCREMENT,
+ `cantidad` INT NULL,
+ `indicaciones` VARCHAR(100) NULL,
+    `duracionDias` INT NULL,
     `medicamento` VARCHAR(10) NOT NULL,
     `receta` VARCHAR(10) NOT NULL,
     PRIMARY KEY (`numero`),
-    FOREIGN KEY (`medicamento`) REFERENCES `Medicamento`(`codigo`),
-    FOREIGN KEY (`receta`) REFERENCES `Receta`(`numero`)
-);
+    INDEX `fk_Linea_Medicamento1_idx` (`medicamento` ASC) VISIBLE,
+    INDEX `fk_Linea_Receta1_idx` (`receta` ASC) VISIBLE,
+    CONSTRAINT `fk_Linea_Medicamento1`
+    FOREIGN KEY (`medicamento`)
+    REFERENCES `proyecto2`.`Medicamento` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Linea_Receta1`
+    FOREIGN KEY (`receta`)
+    REFERENCES `proyecto2`.`Receta` (`numero`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    ) ENGINE = InnoDB;
+
 
 
 -- -----------------------------------------------------
