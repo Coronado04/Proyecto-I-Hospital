@@ -150,7 +150,7 @@ public class Controller {
     // Selecciona un paciente a partir de un filtro
     public void add(Paciente filter) throws Exception {
         model.setFilter(filter);
-        List<Paciente> resultados = Service.instance().searchPaciente(model.getFilter());
+        List<Paciente> resultados = Service.instance().search(model.getFilter());
 
         if (resultados.isEmpty()) {
             throw new Exception("No se encontró ningún paciente con esos datos.");

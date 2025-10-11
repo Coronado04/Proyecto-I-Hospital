@@ -15,7 +15,7 @@ public class Controller {
     public Controller(ViewPreescribir view, Model model, Usuario u) {
         model.init(
                 Service.instance().search(new Receta()),      // lista de recetas
-                Service.instance().searchPaciente(new Paciente()),    // lista de pacientes
+                Service.instance().search(new Paciente()),    // lista de pacientes
                 Service.instance().search(new Medico()),      // lista de médicos
                 Service.instance().searchMedicamento(new Medicamento()),
                 Service.instance().searchLinea(new Linea())// lista de medicamentos
@@ -25,7 +25,7 @@ public class Controller {
         String idMed = u.getId();
         Medico auxMedico = new Medico();
         auxMedico.setId(idMed);
-        List<Medico> actual = Service.instance().searchMedico(auxMedico);
+        List<Medico> actual = Service.instance().search(auxMedico);
 
 
         this.view = view;
@@ -88,7 +88,7 @@ public class Controller {
 
     // --- Búsquedas ---
     public void searchPaciente(Paciente filtro) throws Exception {
-        model.setPacientes(Service.instance().searchPaciente(filtro));
+        model.setPacientes(Service.instance().search(filtro));
         model.updateModel();
     }
 

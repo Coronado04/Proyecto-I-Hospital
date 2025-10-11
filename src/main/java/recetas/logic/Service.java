@@ -72,76 +72,30 @@ public class Service {
         return medicoDao.findByNombre(e);
     }
 
-    public List<Medico> searchMedico(Medico e) {
-        String idFiltro = e.getId() == null ? "" : e.getId().trim();
-
-        return data.getMedicos().stream()
-                .filter(i -> (idFiltro.isEmpty() || i.getId().contains(idFiltro)))
-                        .sorted(Comparator.comparing(Medico::getId))
-                .collect(Collectors.toList());
-    }
-
-
     //============Paciente===========
     public void create(Paciente e) throws Exception {
-        Paciente result = data.getPacientes().stream()
-                .filter(i -> i.getId().equals(e.getId()))
-                .findFirst()
-                .orElse(null);
-        if (result == null) {
-            data.getPacientes().add(e);
-        } else {
-            throw new Exception("Paciente ya existe");
-        }
+       pacienteDao.create(e);
     }
     public Paciente read(Paciente e) throws Exception {
-        Paciente result = data.getPacientes().stream()
-                .filter(i -> i.getId().equals(e.getId()))
-                .findFirst()
-                .orElse(null);
-        if (result != null) {
-            return result;
-        } else {
-            throw new Exception("Paciente no existe");
-        }
+        return pacienteDao.read(e.getId());
     }
 
     public void update(Paciente e) throws Exception {
-        Paciente result;
-        try{
-            result = this.read(e);
-            data.getPacientes().remove(result);
-            data.getPacientes().add(e);
-        } catch (Exception ex) {
-            throw new Exception("Paciente no existe");
-        }
+        pacienteDao.update(e);
     }
 
     public List<Paciente> findAllPaciente() {
-        return data.getPacientes();
+        Paciente filtro = new Paciente();
+        filtro.setNombre("");
+        return pacienteDao.findByNombre(filtro);
     }
     public void delete(Paciente e) throws Exception {
-        boolean removed = data.getPacientes().removeIf(m -> m.getId().equals(e.getId()));
-        if (!removed) {
-            throw new Exception("No se encontró el paciente a eliminar");
-        }
+        pacienteDao.delete(e);
     }
     public List<Paciente> search(Paciente e) {
-        return data.getPacientes().stream()
-                .filter(i -> i.getNombre().contains(e.getNombre()) && i.getId().contains(e.getId()))
-                .sorted(Comparator.comparing(Paciente::getNombre))
-                .collect(Collectors.toList());
+        return pacienteDao.findByNombre(e);
     }
-    public List<Paciente> searchPaciente(Paciente e) {
-        String nombreFiltro = e.getNombre() == null ? "" : e.getNombre().trim();
-        String idFiltro = e.getId() == null ? "" : e.getId().trim();
 
-        return data.getPacientes().stream()
-                .filter(i -> (nombreFiltro.isEmpty() || i.getNombre().contains(nombreFiltro)) &&
-                        (idFiltro.isEmpty() || i.getId().contains(idFiltro)))
-                .sorted(Comparator.comparing(Paciente::getNombre))
-                .collect(Collectors.toList());
-    }
 
 
     // =============== Medicamentos ===============
