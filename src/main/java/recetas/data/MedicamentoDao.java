@@ -28,7 +28,7 @@ public class MedicamentoDao {
     }
 
     public Medicamento read(String codigo) throws Exception{
-        String sql="select * from Medicamento m where m.id=?";
+        String sql="select * from Medicamento m where m.codigo=?";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1, codigo);
         ResultSet rs =  db.executeQuery(stm);
@@ -80,7 +80,7 @@ public class MedicamentoDao {
         return resultado;
     }
 
-    private Medicamento from(ResultSet rs, String alias){
+    public Medicamento from(ResultSet rs, String alias){
         try {
             Medicamento m= new Medicamento();
             m.setCodigo(rs.getString(alias + ".codigo"));

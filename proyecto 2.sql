@@ -78,27 +78,17 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Linea`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `proyecto2`.`Linea` (
-  `numero` INT NOT NULL,
-  `cantidad` INT NULL,
-  `indicaciones` VARCHAR(45) NULL,
-  `duracionDias` INT NULL,
-  `medicamento` INT NOT NULL,
-  `receta` INT NOT NULL,
-  PRIMARY KEY (`numero`),
-  INDEX `fk_Linea_Medicamento1_idx` (`medicamento` ASC) VISIBLE,
-  INDEX `fk_Linea_Receta1_idx` (`receta` ASC) VISIBLE,
-  CONSTRAINT `fk_Linea_Medicamento1`
-    FOREIGN KEY (`medicamento`)
-    REFERENCES `proyecto2`.`Medicamento` (`codigo`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Linea_Receta1`
-    FOREIGN KEY (`receta`)
-    REFERENCES `proyecto2`.`Receta` (`numero`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE `Linea` (
+    `numero` VARCHAR(10) NOT NULL,
+    `cantidad` INT,
+    `indicaciones` VARCHAR(45),
+    `duracionDias` INT,
+    `medicamento` VARCHAR(10) NOT NULL,
+    `receta` VARCHAR(10) NOT NULL,
+    PRIMARY KEY (`numero`),
+    FOREIGN KEY (`medicamento`) REFERENCES `Medicamento`(`codigo`),
+    FOREIGN KEY (`receta`) REFERENCES `Receta`(`numero`)
+);
 
 
 -- -----------------------------------------------------

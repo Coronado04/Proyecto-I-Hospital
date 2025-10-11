@@ -141,45 +141,25 @@ public class Service {
         farmaceutaDao.delete(e);
     }
     public List<Farmaceuta> search(Farmaceuta e){
-        farmaceutaDao.findByNombre(e);
+        return farmaceutaDao.findByNombre(e);
     }
 //===========LINEA==============
 
+  /*  public void create(Linea e) throws Exception {
+        lineaDao.create(e);
+    }*/
+    //Falta por hacer bien este create, creo que ocupa la recetaDao
     public Linea read(Linea e) throws Exception {
-        Linea result = data.getLineas().stream()
-                .filter(i -> i.getMedicamento().getCodigo().equals(e.getMedicamento().getCodigo()))
-                .findFirst()
-                .orElse(null);
-        if (result != null) {
-            return result;
-        } else {
-            throw new Exception("Linea no existe");
-        }
+        return lineaDao.read(e.getMedicamento().getCodigo());
     }
-
 
 
     public void delete(Linea e) throws Exception {
-        boolean removed = data.getLineas().removeIf(m -> m.getMedicamento().getCodigo().equals(e.getMedicamento().getCodigo()));
-        if (!removed) {
-            throw new Exception("No se encontró la Linea a eliminar");
-        }
+        lineaDao.delete(e.getMedicamento().getCodigo());
     }
 
     public List<Linea> search(Linea e) {
-        return data.getLineas().stream()
-                .filter(l -> l.getMedicamento().getNombre().contains(e.getMedicamento().getNombre()))
-                .sorted(Comparator.comparing(l -> l.getMedicamento().getNombre()))
-                .collect(Collectors.toList());
-    }
-    public List<Linea> searchLinea(Linea e){
-        String indicaciones = e.getIndicaciones() == null ? "" : e.getIndicaciones().trim();
-
-        return data.getLineas().stream()
-                .filter(i -> (indicaciones.isEmpty() || i.getIndicaciones().contains(indicaciones)))
-                .sorted(Comparator.comparing(Linea::getIndicaciones))
-                .collect(Collectors.toList());
-
+        return lineaDao.findByNombre(e);
     }
 //==========RECETAS==============
 public void create(Receta e) throws Exception {

@@ -18,7 +18,7 @@ public class Controller {
                 Service.instance().search(new Paciente()),    // lista de pacientes
                 Service.instance().search(new Medico()),      // lista de médicos
                 Service.instance().search(new Medicamento()),
-                Service.instance().searchLinea(new Linea())// lista de medicamentos
+                Service.instance().search(new Linea())// lista de medicamentos
 
 
         );
