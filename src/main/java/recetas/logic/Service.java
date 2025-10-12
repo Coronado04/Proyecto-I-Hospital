@@ -20,6 +20,8 @@ public class Service {
     private FarmaceutaDao farmaceutaDao;
     private LineaDao lineaDao;
     private MedicamentoDao medicamentoDao;
+    private RecetaDao recetaDao;
+    private UsuarioDao usuarioDao;
 
     private Service() {
         try{
@@ -28,6 +30,8 @@ public class Service {
             farmaceutaDao = new FarmaceutaDao();
             lineaDao = new LineaDao();
             medicamentoDao = new MedicamentoDao();
+            recetaDao = new RecetaDao();
+            usuarioDao = new UsuarioDao();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -107,6 +111,7 @@ public class Service {
 
     public Medicamento read(Medicamento e) throws Exception {
         medicamentoDao.read(e.getCodigo());
+        return e;
     }
 
     public void update(Medicamento e) throws Exception {
@@ -130,6 +135,7 @@ public class Service {
 
     public Farmaceuta read(Farmaceuta e) throws Exception {
         farmaceutaDao.read(e.getId());
+        return e;
     }
 
     public void update(Farmaceuta e) throws Exception {
@@ -163,88 +169,71 @@ public class Service {
     }
 //==========RECETAS==============
 public void create(Receta e) throws Exception {
-    Receta result = data.getRecetas().stream()
-            .filter(i -> i.getIdReceta().equals(e.getIdReceta()))
-            .findFirst()
-            .orElse(null);
-    if (result == null) {
-        data.getRecetas().add(e);
-    } else {
-        throw new Exception("Receta ya existe");
-    }
+    String idMedico   = (e.getMedico()   != null) ? e.getMedico().getId()   : null;
+    String idPaciente = (e.getPaciente() != null) ? e.getPaciente().getId() : null;
+    recetaDao.create(e, idMedico, idPaciente);
 }
 
     public Receta read(Receta e) throws Exception {
-        Receta result = data.getRecetas().stream()
-                .filter(i -> i.getIdReceta().equals(e.getIdReceta()))
-                .findFirst()
-                .orElse(null);
-        if (result != null) {
-            return result;
-        } else {
-            throw new Exception("Receta no existe");
-        }
+        return recetaDao.read(e.getIdReceta());
     }
 
     public void update(Receta e) throws Exception {
-        Receta result = this.read(e);
-        data.getRecetas().remove(result);
-        data.getRecetas().add(e);
+        recetaDao.update(e, e.getIdReceta());
     }
 
     public List<Receta> findAllRecetas() {
-        return data.getRecetas();
+        Receta filtro = new Receta();
+        Paciente p = new Paciente();
+        p.setNombre("");
+        filtro.setPaciente(p);
+        return recetaDao.findByNombre(filtro);
     }
 
     public void delete(Receta e) throws Exception {
-        boolean removed = data.getRecetas().removeIf(r -> r.getIdReceta().equals(e.getIdReceta()));
-        if (!removed) {
-            throw new Exception("No se encontró la receta a eliminar");
-        }
+        recetaDao.delete(e.getIdReceta());
     }
-
 
     public List<Receta> search(Receta e) {
-        String nombreFiltro = (e.getPaciente() != null && e.getPaciente().getNombre() != null)
-                ? e.getPaciente().getNombre().trim()
-                : "";
-        String idFiltro = (e.getPaciente() != null && e.getPaciente().getId() != null)
-                ? e.getPaciente().getId().trim()
-                : "";
-
-        return data.getRecetas().stream()
-                .filter(r -> r.getPaciente() != null)
-                .filter(r ->
-                        (nombreFiltro.isEmpty() || r.getPaciente().getNombre().toLowerCase().contains(nombreFiltro.toLowerCase())) &&
-                                (idFiltro.isEmpty() || r.getPaciente().getId().toLowerCase().contains(idFiltro.toLowerCase()))
-                )
-                .sorted(Comparator.comparing(r -> r.getPaciente().getNombre()))
-                .collect(Collectors.toList());
-    }
-    public List<Receta> searchId(Receta filtro) {
-        LocalDate hoy = LocalDate.now();
-
-        return data.getRecetas().stream()
-                .filter(r -> {
-                    // opcional: si se quiere filtrar también por paciente
-                    if (filtro.getPaciente() != null && filtro.getPaciente().getId() != null) {
-                        return r.getPaciente().getId().contains(filtro.getPaciente().getId());
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
+        return recetaDao.findByNombre(e);
     }
 
-    public int getNextRecetaId() {
-        if (data.getRecetas().isEmpty()) {
-            return 1;
-        }
-        return data.getRecetas().stream()
-                .map(r -> r.getIdReceta().replace("REC-", ""))
-                .mapToInt(Integer::parseInt)
-                .max()
-                .orElse(0) + 1;
+    public void create(Usuario e) throws Exception {
+        usuarioDao.create(e);
     }
 
+    public Usuario read(Usuario e) throws Exception {
+        return usuarioDao.read(e.getId());
+    }
 
+    public void update(Usuario e) throws Exception {
+        usuarioDao.update(e);
+    }
+
+    public List<Usuario> findAllUsuarios() {
+        Usuario filtro = new Usuario();
+        filtro.setNombre("");
+        return usuarioDao.findByNombre(filtro);
+    }
+
+    public void delete(Usuario e) throws Exception {
+        usuarioDao.delete(e);
+    }
+
+    public List<Usuario> search(Usuario e) {
+        return usuarioDao.findByNombre(e);
+    }
 }
+
+//No estoy seguro de esta polla
+//    public int getNextRecetaId() {
+//        if (data.getRecetas().isEmpty()) {
+//            return 1;
+//        }
+//        return data.getRecetas().stream()
+//                .map(r -> r.getIdReceta().replace("REC-", ""))
+//                .mapToInt(Integer::parseInt)
+//                .max()
+//                .orElse(0) + 1;
+//    }
+
