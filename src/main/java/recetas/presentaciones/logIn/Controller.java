@@ -2,11 +2,8 @@ package recetas.presentaciones.logIn;
 
 import recetas.logic.Sesion;
 import recetas.logic.Usuario;
-import recetas.logic.Medico;
-import recetas.logic.Farmaceuta;
 
 import javax.swing.*;
-
 
 public class Controller {
     private Model model;
@@ -24,13 +21,20 @@ public class Controller {
         view.getCambiar().addActionListener(e -> cambiarClave());
     }
 
+    // ==========================================================
+    // LOGIN
+    // ==========================================================
     private void login() {
-
         try {
-            String user = view.getIdUsuario().getText();
-            String pass = new String(view.getContraseña().getPassword());
+            String user = view.getIdUsuario().getText().trim();
+            String pass = new String(view.getContraseña().getPassword()).trim();
 
-            Usuario u = Sesion.login(user, pass);
+            if (user.isEmpty() || pass.isEmpty()) {
+                throw new Exception("Debe ingresar usuario y contraseña.");
+            }
+
+            // 🔹 Verificar credenciales usando la base de datos
+            Usuario u = Sesion.login(user, pass); // ← este método debe hacer la consulta SQL
 
             model.setUsuario(u);
             Sesion.setUsuario(u);
@@ -38,95 +42,53 @@ public class Controller {
             JOptionPane.showMessageDialog(view,
                     "Bienvenido " + u.getNombre() + " (" + u.getRol() + ")");
 
-
             view.dispose();
+
+            // 🔹 Si quieres, aquí puedes abrir la ventana según el rol
+            // if (u.getRol().equalsIgnoreCase("medico")) new ViewMedico(u).setVisible(true);
+            // else if (u.getRol().equalsIgnoreCase("farmaceuta")) new ViewFarmaceuta(u).setVisible(true);
+            // else new ViewAdmin(u).setVisible(true);
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // ==========================================================
+    // CAMBIO DE CLAVE
+    // ==========================================================
     private void cambiarClave() {
         try {
             String user = JOptionPane.showInputDialog(view, "Ingrese su usuario:");
-            if (user == null || user.isEmpty()) {
-                return;
-            }
+            if (user == null || user.isEmpty()) return;
 
             String oldPass = JOptionPane.showInputDialog(view, "Ingrese su clave actual:");
-            if (oldPass == null || oldPass.isEmpty()) {
+            if (oldPass == null || oldPass.isEmpty()) return;
+
+            // 🔹 Verificar usuario existente
+            Usuario u = Sesion.login(user, oldPass);
+            if (u == null) {
+                JOptionPane.showMessageDialog(view, "Usuario o clave incorrectos.");
                 return;
             }
 
+            String newPass = JOptionPane.showInputDialog(view, "Ingrese la nueva clave:");
+            if (newPass == null || newPass.isEmpty()) return;
 
-            Data data = XmlPersister.instance().load();
+            // 🔹 Actualizar la clave en la base de datos
+            Sesion.actualizarClave(u.getId(), newPass);
 
+            // 🔹 Actualizar la sesión en memoria
+            u.setClave(newPass);
+            model.setUsuario(u);
+            Sesion.setUsuario(u);
 
-            if (data.getAdmin().getId().equalsIgnoreCase(user) && data.getAdmin().getClave().equals(oldPass)) {
-                String newPass = JOptionPane.showInputDialog(view, "Ingrese la nueva clave:");
-                if (newPass != null && !newPass.isEmpty()) {
-                    data.getAdmin().setClave(newPass); // actualizar en memoria
-
-                    // 🔹 Guardar cambios en el XML
-                    XmlPersister.instance().store(data);
-
-                    Usuario u = new Usuario(data.getAdmin().getNombre(), data.getAdmin().getId(), data.getAdmin().getClave(), "admin");
-                    model.setUsuario(u);
-                    Sesion.setUsuario(u);
-
-                    JOptionPane.showMessageDialog(view, "Clave cambiada con éxito.");
-                }
-                return;
-            }
-
-
-            // ====== Buscar en médicos ======
-            for (Medico m : data.getMedicos()) {
-                if (m.getId().equalsIgnoreCase(user) && m.getClave().equals(oldPass)) {
-                    String newPass = JOptionPane.showInputDialog(view, "Ingrese la nueva clave:");
-                    if (newPass != null && !newPass.isEmpty()) {
-                        m.setClave(newPass); // actualizar en memoria
-
-                        // 🔹 Guardar cambios en el XML
-                        XmlPersister.instance().store(data);
-
-                        Usuario u = new Usuario(m.getNombre(), m.getId(), m.getClave(), "medico");
-                        model.setUsuario(u);
-                        Sesion.setUsuario(u);
-
-                        JOptionPane.showMessageDialog(view, "Clave cambiada con éxito.");
-                    }
-                    return;
-                }
-            }
-
-            // ====== Buscar en farmaceutas ======
-            for (Farmaceuta f : data.getFarmaceutas()) {
-                if (f.getId().equalsIgnoreCase(user) && f.getClave().equals(oldPass)) {
-                    String newPass = JOptionPane.showInputDialog(view, "Ingrese la nueva clave:");
-                    if (newPass != null && !newPass.isEmpty()) {
-                        f.setClave(newPass); // actualizar en memoria
-
-                        XmlPersister.instance().store(data);
-
-                        Usuario u = new Usuario(f.getNombre(), f.getId(), f.getClave(), "farmaceuta");
-                        model.setUsuario(u);
-                        Sesion.setUsuario(u);
-
-                        JOptionPane.showMessageDialog(view, "Clave cambiada con éxito.");
-                    }
-                    return;
-                }
-            }
-
-            JOptionPane.showMessageDialog(view, "Usuario o clave incorrectos.");
+            JOptionPane.showMessageDialog(view, "Clave cambiada con éxito.");
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, "Error al cambiar la clave: " + ex.getMessage());
         }
     }
-
-
-
 }
+
 

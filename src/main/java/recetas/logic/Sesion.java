@@ -1,7 +1,12 @@
 package recetas.logic;
 
+import recetas.data.Database;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class Sesion {
     private static Usuario usuario;
+    private static Database db = Database.instance();
 
     public static void setUsuario(Usuario usuario) {
         Sesion.usuario = usuario;
@@ -15,35 +20,43 @@ public class Sesion {
         return usuario != null;
     }
 
-
+    // ==========================================================
+    // LOGIN DESDE BASE DE DATOS
+    // ==========================================================
     public static Usuario login(String id, String clave) throws Exception {
+        String sql = "SELECT * FROM usuario WHERE id=? AND clave=?";
+        PreparedStatement stm = db.prepareStatement(sql);
+        stm.setString(1, id);
+        stm.setString(2, clave);
 
-        Data data = XmlPersister.instance().load();
+        ResultSet rs = db.executeQuery(stm);
 
-        Usuario admin = data.getAdmin();
+        if (rs.next()) {
+            Usuario u = new Usuario();
+            u.setId(rs.getString("id"));
+            u.setNombre(rs.getString("nombre"));
+            u.setClave(rs.getString("clave"));
+            u.setRol(rs.getString("rol"));
 
-            if (admin.getId().equals(id) && admin.getClave().equals(clave)) {
-                usuario = new Usuario(admin.getNombre(), admin.getId(), admin.getClave(), "admin");
-                return usuario;
-            }
-
-
-        // Buscar en listas
-        for (Medico m : data.getMedicos()) {
-            if (m.getId().trim().equalsIgnoreCase(id.trim()) &&
-                    m.getClave().trim().equals(clave.trim())) {
-                usuario = new Usuario(m.getNombre(), m.getId(), m.getClave(), "medico");
-                return usuario;
-            }
+            usuario = u;
+            return u;
+        } else {
+            throw new Exception("Usuario o clave incorrectos");
         }
+    }
 
-        for (Farmaceuta f : data.getFarmaceutas()) {
-            if (f.getId().equals(id) && f.getClave().equals(clave)) {
-                usuario = new Usuario(f.getNombre(), f.getId(), f.getClave(), "farmaceuta");
-                return usuario;
-            }
+    // ==========================================================
+    // CAMBIAR CLAVE EN LA BASE DE DATOS
+    // ==========================================================
+    public static void actualizarClave(String id, String nuevaClave) throws Exception {
+        String sql = "UPDATE usuario SET clave=? WHERE id=?";
+        PreparedStatement stm = db.prepareStatement(sql);
+        stm.setString(1, nuevaClave);
+        stm.setString(2, id);
+
+        int count = db.executeUpdate(stm);
+        if (count == 0) {
+            throw new Exception("No se pudo actualizar la clave (usuario no encontrado).");
         }
-
-        throw new Exception("Usuario o clave incorrectos");
     }
 }

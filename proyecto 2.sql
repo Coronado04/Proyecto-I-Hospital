@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `proyecto2`.`Usuario` (
   `id` VARCHAR(10) NOT NULL,
   `nombre` VARCHAR(45) NULL,
   `clave` VARCHAR(45) NULL,
-  `rol` VARCHAR(45) NULL,
+    rol ENUM('admin', 'medico', 'farmaceuta') NOT NULL
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

@@ -32,12 +32,10 @@ public class Service {
             medicamentoDao = new MedicamentoDao();
             recetaDao = new RecetaDao();
             usuarioDao = new UsuarioDao();
+            Usuario admin = new Usuario("Administrador", "admin", "1234", "admin");
         } catch (Exception e) {
             System.out.println(e);
         }
-
-         //   data.setAdmin(new Usuario("Administrador", "admin", "1234", "admin"));
-
     }
 
     public void stop(){
@@ -151,9 +149,13 @@ public class Service {
     }
 //===========LINEA==============
 
-   /* public void create(Linea e) throws Exception {
-        lineaDao.create(e);
-    }*/
+    public void create(Linea l, String idReceta) throws Exception {
+        if (idReceta == null || idReceta.isEmpty()) {
+            throw new Exception("La línea debe pertenecer a una receta existente");
+        }
+        lineaDao.create(l, idReceta);
+    }
+
     //Falta por hacer bien este create, creo que ocupa la recetaDao
     public Linea read(Linea e) throws Exception {
         return lineaDao.read(e.getNumero());

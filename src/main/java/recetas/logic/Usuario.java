@@ -25,7 +25,7 @@ public class Usuario {
 
     public String getClave() { return clave; }
     public void setClave(String clave) { this.clave = clave; }
-
+    public void setRol(String rol) { this.rol = rol; }
     public String getRol() { return rol; }
 
     @Override

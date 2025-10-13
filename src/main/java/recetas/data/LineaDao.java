@@ -14,21 +14,21 @@ public class LineaDao {
         db = Database.instance();
     }
 
-    public void create(Linea l, String numeroReceta) throws Exception {
-        String sql = "INSERT INTO Linea (cantidad, indicaciones, duracionDias, medicamento, receta) " +
-                "VALUES (?,?,?,?,?)";
+    public void create(Linea l, String idReceta) throws Exception {
+        String sql = "INSERT INTO Linea (cantidad, indicaciones, duracionDias, medicamento, receta) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setInt(1, l.getCantidad());
         stm.setString(2, l.getIndicaciones());
         stm.setInt(3, l.getDuracionDias());
         stm.setString(4, l.getMedicamento().getCodigo());
-        stm.setString(5, numeroReceta);
+        stm.setString(5, idReceta);
 
         int count = db.executeUpdate(stm);
         if (count == 0) {
-            throw new Exception("Error al crear la línea");
+            throw new Exception("No se pudo crear la línea.");
         }
     }
+
 
     public Linea read(int numero) throws Exception {
         String sql = "SELECT * FROM Linea l " +
