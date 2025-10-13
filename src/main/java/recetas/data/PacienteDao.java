@@ -15,7 +15,7 @@ public class PacienteDao {
         db=Database.instance();
     }
     public void create(Paciente p) throws Exception {
-        String sql="insert into paciente(id,nombre,fechaNacimiento,numero)"+
+        String sql="insert into paciente(id,nombre,fechaNacimiento,telefono)"+
                 "values(?,?,?,?)";
         PreparedStatement stm=db.prepareStatement(sql);
         stm.setString(1,p.getId());

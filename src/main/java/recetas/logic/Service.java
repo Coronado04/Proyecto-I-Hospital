@@ -110,9 +110,9 @@ public class Service {
     }
 
     public Medicamento read(Medicamento e) throws Exception {
-        medicamentoDao.read(e.getCodigo());
-        return e;
+        return medicamentoDao.read(e.getCodigo());
     }
+
 
     public void update(Medicamento e) throws Exception {
         medicamentoDao.update(e);
@@ -151,7 +151,7 @@ public class Service {
     }
 //===========LINEA==============
 
-  /*  public void create(Linea e) throws Exception {
+   /* public void create(Linea e) throws Exception {
         lineaDao.create(e);
     }*/
     //Falta por hacer bien este create, creo que ocupa la recetaDao
