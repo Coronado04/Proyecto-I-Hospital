@@ -2,10 +2,7 @@ package recetas.logic;
 
 import recetas.data.*;
 
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Service {
     private static Service theInstance;
@@ -32,7 +29,7 @@ public class Service {
             medicamentoDao = new MedicamentoDao();
             recetaDao = new RecetaDao();
             usuarioDao = new UsuarioDao();
-            Usuario admin = new Usuario("Administrador", "admin", "1234", "admin");
+          //  Usuario admin = new Usuario("Administrador", "admin", "1234", "admin");
         } catch (Exception e) {
             System.out.println(e);
         }

@@ -105,7 +105,7 @@ public class Controller {
         if (model.getCurrentReceta().getDetalles().isEmpty()) JOptionPane.showMessageDialog(view.getPanel(), "Seleccione al menos un medicamento", "",  JOptionPane.ERROR_MESSAGE);
 
         // Generar un id único (ej: REC-001)
-        receta.setIdReceta("REC-" + Service.instance().getNextRecetaId());
+       // receta.setIdReceta("REC-" + Service.instance().getNextRecetaId());
 
         Service.instance().create(receta);
         model.updateModel();

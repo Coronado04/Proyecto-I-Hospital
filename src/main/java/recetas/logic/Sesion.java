@@ -24,7 +24,7 @@ public class Sesion {
     // LOGIN DESDE BASE DE DATOS
     // ==========================================================
     public static Usuario login(String id, String clave) throws Exception {
-        String sql = "SELECT * FROM usuario WHERE id=? AND clave=?";
+        String sql = "SELECT * FROM Usuario WHERE id=? AND clave=?";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1, id);
         stm.setString(2, clave);

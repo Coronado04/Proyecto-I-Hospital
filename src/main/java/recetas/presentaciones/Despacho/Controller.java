@@ -25,7 +25,7 @@ public class Controller {
         model.setFilter(filter);
         model.setMode(Application.MODE_CREATE);
         model.setCurrentReceta(new Receta());
-        model.setListaRecetas(Service.instance().searchId(model.getFilter()));
+        model.setListaRecetas(Service.instance().search(model.getFilter()));
     }
     public void save(Receta e) throws Exception {
         switch(model.getMode()){
