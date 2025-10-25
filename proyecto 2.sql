@@ -18,73 +18,73 @@ USE `proyecto2` ;
 -- Table `proyecto2`.`Medico`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Medico` (
-  `nombre` VARCHAR(45) NULL,
-  `especialidad` VARCHAR(45) NULL,
-  `id` VARCHAR(10) NOT NULL,
-  `clave` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
+                                                    `nombre` VARCHAR(45) NULL,
+    `especialidad` VARCHAR(45) NULL,
+    `id` VARCHAR(10) NOT NULL,
+    `clave` VARCHAR(45) NULL,
+    PRIMARY KEY (`id`))
+    ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Paciente`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Paciente` (
-  `id` VARCHAR(10) NOT NULL,
-  `nombre` VARCHAR(45) NULL,
-  `fechaNacimiento` DATE NULL,
-  `telefono` VARCHAR(10) NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
+                                                      `id` VARCHAR(10) NOT NULL,
+    `nombre` VARCHAR(45) NULL,
+    `fechaNacimiento` DATE NULL,
+    `telefono` VARCHAR(10) NULL,
+    PRIMARY KEY (`id`))
+    ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Receta`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Receta` (
- `numero` INT NOT NULL AUTO_INCREMENT,
-  `fechaConfeccion` DATE NULL,
-  `fechaRetiro` DATE NULL,
-  `estado` VARCHAR(20) NULL,
-  `medico` VARCHAR(10) NOT NULL,
-  `paciente` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`numero`),
-  INDEX `fk_Receta_Medico1_idx` (`medico` ASC) VISIBLE,
-  INDEX `fk_Receta_Paciente1_idx` (`paciente` ASC) VISIBLE,
-  CONSTRAINT `fk_Receta_Medico1`
+                                                    `numero` INT NOT NULL AUTO_INCREMENT,
+                                                    `fechaConfeccion` DATE NULL,
+                                                    `fechaRetiro` DATE NULL,
+                                                    `estado` VARCHAR(20) NULL,
+    `medico` VARCHAR(10) NOT NULL,
+    `paciente` VARCHAR(10) NOT NULL,
+    PRIMARY KEY (`numero`),
+    INDEX `fk_Receta_Medico1_idx` (`medico` ASC) VISIBLE,
+    INDEX `fk_Receta_Paciente1_idx` (`paciente` ASC) VISIBLE,
+    CONSTRAINT `fk_Receta_Medico1`
     FOREIGN KEY (`medico`)
     REFERENCES `proyecto2`.`Medico` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Receta_Paciente1`
+    CONSTRAINT `fk_Receta_Paciente1`
     FOREIGN KEY (`paciente`)
     REFERENCES `proyecto2`.`Paciente` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Medicamento`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Medicamento` (
-  `codigo` INT NOT NULL,
-  `nombre` VARCHAR(45) NULL,
-  `presentacion` VARCHAR(45) NULL,
-  PRIMARY KEY (`codigo`))
-ENGINE = InnoDB;
+                                                         `codigo` INT NOT NULL,
+                                                         `nombre` VARCHAR(45) NULL,
+    `presentacion` VARCHAR(45) NULL,
+    PRIMARY KEY (`codigo`))
+    ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Linea`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Linea` (
- `numero` INT NOT NULL AUTO_INCREMENT,
- `cantidad` INT NULL,
- `indicaciones` VARCHAR(100) NULL,
+                                       `numero` INT NOT NULL AUTO_INCREMENT,
+                                       `cantidad` INT NULL,
+                                       `indicaciones` VARCHAR(100) NULL,
     `duracionDias` INT NULL,
-    `medicamento` VARCHAR(10) NOT NULL,
-    `receta` VARCHAR(10) NOT NULL,
+    `medicamento` INT NOT NULL,
+    `receta` INT NOT NULL,
     PRIMARY KEY (`numero`),
     INDEX `fk_Linea_Medicamento1_idx` (`medicamento` ASC) VISIBLE,
     INDEX `fk_Linea_Receta1_idx` (`receta` ASC) VISIBLE,
@@ -106,23 +106,23 @@ CREATE TABLE IF NOT EXISTS `Linea` (
 -- Table `proyecto2`.`Usuario`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Usuario` (
-  `id` VARCHAR(10) NOT NULL,
-  `nombre` VARCHAR(45) NULL,
-  `clave` VARCHAR(45) NULL,
-    rol ENUM('admin', 'medico', 'farmaceuta') NOT NULL
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
+                                                     `id` VARCHAR(10) NOT NULL,
+    `nombre` VARCHAR(45) NULL,
+    `clave` VARCHAR(45) NULL,
+    rol ENUM('admin', 'medico', 'farmaceuta') NOT NULL,
+    PRIMARY KEY (`id`))
+    ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
 -- Table `proyecto2`.`Farmaceuta`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Farmaceuta` (
-  `id` VARCHAR(10) NOT NULL,
-  `nombre` VARCHAR(45) NULL,
-  `clave` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
+                                                        `id` VARCHAR(10) NOT NULL,
+    `nombre` VARCHAR(45) NULL,
+    `clave` VARCHAR(45) NULL,
+    PRIMARY KEY (`id`))
+    ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
