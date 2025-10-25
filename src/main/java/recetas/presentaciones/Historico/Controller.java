@@ -1,12 +1,14 @@
 package recetas.presentaciones.Historico;
 
 import recetas.Application;
+import recetas.logic.Paciente;
 import recetas.logic.Receta;
 import recetas.logic.Service;
 
 public class Controller {
     private ViewHistorico viewHistorico;
     private Model model;
+
 
     public Controller(ViewHistorico viewHistorico, Model model) {
         model.init(Service.instance().search(new Receta()));

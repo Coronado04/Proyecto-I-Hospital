@@ -23,9 +23,15 @@ public class Database {
     public Connection getConnection(){
         try {
             Properties prop = new Properties();
-            URL resourceUrl = getClass().getResource(PROPERTIES_FILE_NAME);
+           URL resourceUrl = getClass().getResource(PROPERTIES_FILE_NAME);
             File file = new File(resourceUrl.toURI());
             prop.load(new BufferedInputStream(new FileInputStream(file)));
+//            try (var input = getClass().getResourceAsStream(PROPERTIES_FILE_NAME)) {
+//                if (input == null) {
+//                    throw new Exception("No se encontró el archivo " + PROPERTIES_FILE_NAME);
+//                }
+//                prop.load(input);
+//            }
             String driver = prop.getProperty("database_driver");
             String server = prop.getProperty("database_server");
             String port = prop.getProperty("database_port");
