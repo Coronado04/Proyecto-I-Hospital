@@ -17,22 +17,38 @@ public class RecetaDao {
         db = Database.instance();
     }
 
+    /**
+     * Ahora la columna PK en la BD es 'numero' AUTO_INCREMENT.
+     * Insertamos sin proporcionar el id, solicitamos generated keys
+     * y asignamos el numero generado a e.setIdReceta(String).
+     */
     public void create(Receta e, String idMedico, String idPaciente) throws Exception {
-        String sql = "INSERT INTO Receta (idReceta, medico, paciente, fechaConfeccion, fechaRetiro, estado) " +
-                "VALUES (?,?,?,?,?,?)";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, e.getIdReceta());
-        if (idMedico != null) stm.setString(2, idMedico); else stm.setNull(2, Types.VARCHAR);
-        if (idPaciente != null) stm.setString(3, idPaciente); else stm.setNull(3, Types.VARCHAR);
-        LocalDate fc = e.getFechaConfeccion();
-        LocalDate fr = e.getFechaRetiro();
-        if (fc != null) stm.setDate(4, java.sql.Date.valueOf(fc)); else stm.setNull(4, Types.DATE);
-        if (fr != null) stm.setDate(5, java.sql.Date.valueOf(fr)); else stm.setNull(5, Types.DATE);
-        stm.setString(6, (e.getEstado() != null) ? e.getEstado().name() : null);
+        String sql = "INSERT INTO Receta (medico, paciente, fechaConfeccion, fechaRetiro, estado) " +
+                "VALUES (?,?,?,?,?)";
+        try (PreparedStatement stm = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            if (idMedico != null) stm.setString(1, idMedico); else stm.setNull(1, Types.VARCHAR);
+            if (idPaciente != null) stm.setString(2, idPaciente); else stm.setNull(2, Types.VARCHAR);
+            LocalDate fc = e.getFechaConfeccion();
+            LocalDate fr = e.getFechaRetiro();
+            if (fc != null) stm.setDate(3, java.sql.Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
+            if (fr != null) stm.setDate(4, java.sql.Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
+            stm.setString(5, (e.getEstado() != null) ? e.getEstado().name() : null);
 
-        int count = db.executeUpdate(stm);
-        if (count == 0) {
-            throw new Exception("Error al crear la receta");
+            int count = stm.executeUpdate();
+            if (count == 0) {
+                throw new Exception("Error al crear la receta");
+            }
+
+            // Obtener la clave generada (numero)
+            try (ResultSet keys = stm.getGeneratedKeys()) {
+                if (keys != null && keys.next()) {
+                    int generated = keys.getInt(1);
+                    e.setIdReceta(String.valueOf(generated));
+                }
+            } catch (SQLException ex) {
+                // no crítico, pero informar
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -41,61 +57,62 @@ public class RecetaDao {
                 "FROM Receta r " +
                 "LEFT JOIN Medico me ON r.medico = me.id " +
                 "LEFT JOIN Paciente pa ON r.paciente = pa.id " +
-                "WHERE r.idReceta = ?";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, idReceta);
-        ResultSet rs = db.executeQuery(stm);
-
-        if (rs != null && rs.next()) {
-            return from(rs);
-        } else {
-            throw new Exception("Receta no existe");
+                "WHERE r.numero = ?";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            stm.setInt(1, Integer.parseInt(idReceta));
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    return from(rs);
+                } else {
+                    throw new Exception("Receta no existe");
+                }
+            }
         }
     }
 
     public void update(Receta r, String idReceta) throws Exception {
-        String sql = "UPDATE Receta SET medico=?, paciente=?, fechaConfeccion=?, fechaRetiro=?, estado=? WHERE idReceta=?";
-        PreparedStatement stm = db.prepareStatement(sql);
+        String sql = "UPDATE Receta SET medico=?, paciente=?, fechaConfeccion=?, fechaRetiro=?, estado=? WHERE numero=?";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
 
-        // pasar los IDs reales o NULL si no existen
-        if (r.getMedico() != null && r.getMedico().getId() != null && !r.getMedico().getId().isEmpty())
-            stm.setString(1, r.getMedico().getId());
-        else
-            stm.setNull(1, Types.VARCHAR);
+            if (r.getMedico() != null && r.getMedico().getId() != null && !r.getMedico().getId().isEmpty())
+                stm.setString(1, r.getMedico().getId());
+            else
+                stm.setNull(1, Types.VARCHAR);
 
-        if (r.getPaciente() != null && r.getPaciente().getId() != null && !r.getPaciente().getId().isEmpty())
-            stm.setString(2, r.getPaciente().getId());
-        else
-            stm.setNull(2, Types.VARCHAR);
+            if (r.getPaciente() != null && r.getPaciente().getId() != null && !r.getPaciente().getId().isEmpty())
+                stm.setString(2, r.getPaciente().getId());
+            else
+                stm.setNull(2, Types.VARCHAR);
 
-        LocalDate fc = r.getFechaConfeccion();
-        LocalDate fr = r.getFechaRetiro();
-        if (fc != null) stm.setDate(3, java.sql.Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
-        if (fr != null) stm.setDate(4, java.sql.Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
+            LocalDate fc = r.getFechaConfeccion();
+            LocalDate fr = r.getFechaRetiro();
+            if (fc != null) stm.setDate(3, java.sql.Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
+            if (fr != null) stm.setDate(4, java.sql.Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
 
-        stm.setString(5, (r.getEstado() != null) ? r.getEstado().name() : null);
-        stm.setString(6, idReceta);
+            stm.setString(5, (r.getEstado() != null) ? r.getEstado().name() : null);
+            stm.setInt(6, Integer.parseInt(idReceta));
 
-        int count = db.executeUpdate(stm);
-        if (count == 0) {
-            throw new Exception("Receta no existe");
+            int count = stm.executeUpdate();
+            if (count == 0) {
+                throw new Exception("Receta no existe");
+            }
         }
     }
 
     public void delete(String idReceta) throws Exception {
-        String sql = "DELETE FROM Receta WHERE idReceta = ?";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, idReceta);
-        int count = db.executeUpdate(stm);
-        if (count == 0) {
-            throw new Exception("Receta no existe");
+        String sql = "DELETE FROM Receta WHERE numero = ?";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            stm.setInt(1, Integer.parseInt(idReceta));
+            int count = stm.executeUpdate();
+            if (count == 0) {
+                throw new Exception("Receta no existe");
+            }
         }
     }
 
     public List<Receta> findByNombre(Receta filtro) {
         List<Receta> resultado = new ArrayList<>();
         try {
-            // Construir SQL base con LEFT JOIN para no excluir recetas sin paciente/medico
             String sql = "SELECT r.*, me.nombre AS me_nombre, pa.nombre AS pa_nombre " +
                     "FROM Receta r " +
                     "LEFT JOIN Medico me ON r.medico = me.id " +
@@ -128,8 +145,11 @@ public class RecetaDao {
     private Receta from(ResultSet rs) throws SQLException {
         Receta r = new Receta();
 
-        // Campos de la tabla Receta
-        r.setIdReceta(rs.getString("idReceta"));
+        // mapa numero auto_increment al id del modelo
+        try {
+            int numero = rs.getInt("numero");
+            r.setIdReceta(String.valueOf(numero));
+        } catch (Exception ignored) {}
 
         Date d1 = rs.getDate("fechaConfeccion");
         Date d2 = rs.getDate("fechaRetiro");
@@ -144,7 +164,7 @@ public class RecetaDao {
         }
 
         // Paciente (puede ser nulo)
-        Paciente p = new Paciente();
+        recetas.logic.Paciente p = new recetas.logic.Paciente();
         String pacienteId = null;
         try { pacienteId = rs.getString("paciente"); } catch (Exception ignored) {}
         try { p.setId(pacienteId); } catch (Exception ignored) {}

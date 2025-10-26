@@ -14,10 +14,24 @@ public class LineaDao {
         db = Database.instance();
     }
 
+    /**
+     * Ahora la FK 'receta' en la tabla Linea es un INT que referencia Receta.numero.
+     * El método acepta idReceta como String (porque el modelo almacena idReceta como String),
+     * pero convierte a int cuando inserta. Si idReceta es null se inserta NULL.
+     */
     public void create(Linea l, String idReceta) throws Exception {
         String sql = "INSERT INTO Linea (receta, medicamento, cantidad, indicaciones, duracionDias) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, idReceta);
+            if (idReceta != null && !idReceta.isEmpty()) {
+                try {
+                    stm.setInt(1, Integer.parseInt(idReceta));
+                } catch (NumberFormatException ex) {
+                    stm.setNull(1, Types.INTEGER);
+                }
+            } else {
+                stm.setNull(1, Types.INTEGER);
+            }
+
             stm.setString(2, l.getMedicamento() != null ? l.getMedicamento().getCodigo() : null);
             stm.setInt(3, l.getCantidad());
             stm.setString(4, l.getIndicaciones());
@@ -109,12 +123,10 @@ public class LineaDao {
         Linea l = new Linea();
         Medicamento m = new Medicamento();
 
-        // Llenar medicamento (puede quedar con campos null si no hay medicamento)
         m.setCodigo(rs.getString("med_codigo"));
         m.setNombre(rs.getString("med_nombre"));
         m.setPresentacion(rs.getString("med_presentacion"));
 
-        // Llenar linea
         try {
             l.setNumero(rs.getInt("numero"));
         } catch (SQLException ignored) { }
