@@ -64,14 +64,22 @@ public class Sesion {
     // CAMBIAR CLAVE EN LA BASE DE DATOS
     // ==========================================================
     public static void actualizarClave(String id, String nuevaClave) throws Exception {
-        String sql = "UPDATE usuario SET clave=? WHERE id=?";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, nuevaClave);
-        stm.setString(2, id);
+        String[] tablas = { "Usuario", "Medico", "Farmaceuta" }; // misma prioridad que en login
+        int updated = 0;
 
-        int count = db.executeUpdate(stm);
-        if (count == 0) {
-            throw new Exception("No se pudo actualizar la clave (usuario no encontrado).");
+        for (String tabla : tablas) {
+            String sql = "UPDATE " + tabla + " SET clave=? WHERE id=?";
+            try (PreparedStatement stm = db.prepareStatement(sql)) {
+                stm.setString(1, nuevaClave); // <-- sin comillas en el SQL
+                stm.setString(2, id);
+                updated = db.executeUpdate(stm);
+            }
+            if (updated > 0) break; // ya lo encontramos y actualizamos
+        }
+
+        if (updated == 0) {
+            throw new Exception("No se pudo actualizar la clave (no existe en Usuario/Medico/Farmaceuta).");
         }
     }
+
 }
