@@ -27,9 +27,9 @@ public class Sesion {
         String sql =
                 "SELECT id, nombre, clave, rol, 1 AS pri FROM Usuario WHERE id=? AND clave=? " +
                         "UNION ALL " +
-                        "SELECT id, nombre, clave, 'MEDICO' AS rol, 2 AS pri FROM Medico WHERE id=? AND clave=? " +
+                        "SELECT id, nombre, clave, 'medico' AS rol, 2 AS pri FROM Medico WHERE id=? AND clave=? " +
                         "UNION ALL " +
-                        "SELECT id, nombre, clave, 'FARMACEUTA' AS rol, 3 AS pri FROM Farmaceuta WHERE id=? AND clave=? " +
+                        "SELECT id, nombre, clave, 'farmaceuta' AS rol, 3 AS pri FROM Farmaceuta WHERE id=? AND clave=? " +
                         // Usa una de estas según tu motor de BD:
                         // "ORDER BY pri LIMIT 1";                   // MySQL / PostgreSQL
                         // "ORDER BY pri OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY"; // Oracle / DB2 (12c+)
