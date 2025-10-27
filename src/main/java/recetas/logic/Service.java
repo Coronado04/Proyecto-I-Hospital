@@ -2,6 +2,7 @@ package recetas.logic;
 
 import recetas.data.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class Service {
@@ -29,7 +30,7 @@ public class Service {
             medicamentoDao = new MedicamentoDao();
             recetaDao = new RecetaDao();
             usuarioDao = new UsuarioDao();
-           Usuario admin = new Usuario("Administrador", "admin", "1234", "admin");
+            // Si quieres crear un usuario admin por defecto, hazlo explícitamente con usuarioDao.create(...)
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -42,9 +43,6 @@ public class Service {
             System.out.println(e);
         }
     }
-   /* public Usuario getAdmin() {
-        return data.getAdmin();
-    }*/
 
     // =============== Medico ===============
     public void create(Medico e) throws Exception {
@@ -73,9 +71,9 @@ public class Service {
         return medicoDao.findByNombre(e);
     }
 
-    //============Paciente===========
+    // ============= Paciente ============
     public void create(Paciente e) throws Exception {
-       pacienteDao.create(e);
+        pacienteDao.create(e);
     }
     public Paciente read(Paciente e) throws Exception {
         return pacienteDao.read(e.getId());
@@ -97,8 +95,6 @@ public class Service {
         return pacienteDao.findByNombre(e);
     }
 
-
-
     // =============== Medicamentos ===============
     public void create(Medicamento e) throws Exception {
         medicamentoDao.create(e);
@@ -108,12 +104,13 @@ public class Service {
         return medicamentoDao.read(e.getCodigo());
     }
 
-
     public void update(Medicamento e) throws Exception {
         medicamentoDao.update(e);
     }
 
-    public List<Medicamento> findAllMedicamentos() {return medicamentoDao.findByNombre(new Medicamento());}
+    public List<Medicamento> findAllMedicamentos() {
+        return medicamentoDao.findByNombre(new Medicamento());
+    }
 
     public void delete(Medicamento e) throws Exception {
         medicamentoDao.delete(e);
@@ -122,21 +119,18 @@ public class Service {
         return medicamentoDao.findByNombre(e);
     }
 
-
     // ============= Farmaceuta ===============
     public void create(Farmaceuta e) throws Exception {
         farmaceutaDao.create(e);
     }
 
     public Farmaceuta read(Farmaceuta e) throws Exception {
-        farmaceutaDao.read(e.getId());
-        return e;
+        return farmaceutaDao.read(e.getId());
     }
 
     public void update(Farmaceuta e) throws Exception {
         farmaceutaDao.update(e);
     }
-
 
     public void delete(Farmaceuta e) throws Exception {
         farmaceutaDao.delete(e);
@@ -144,8 +138,8 @@ public class Service {
     public List<Farmaceuta> search(Farmaceuta e){
         return farmaceutaDao.findByNombre(e);
     }
-//===========LINEA==============
 
+    // ============ LINEA ==============
     public void create(Linea l, String idReceta) throws Exception {
         if (idReceta == null || idReceta.isEmpty()) {
             throw new Exception("La línea debe pertenecer a una receta existente");
@@ -153,11 +147,9 @@ public class Service {
         lineaDao.create(l, idReceta);
     }
 
-    //Falta por hacer bien este create, creo que ocupa la recetaDao
     public Linea read(Linea e) throws Exception {
         return lineaDao.read(e.getNumero());
     }
-
 
     public void delete(Linea e) throws Exception {
         lineaDao.delete(e.getNumero());
@@ -166,12 +158,54 @@ public class Service {
     public List<Linea> search(Linea e) {
         return lineaDao.findByNombre(e);
     }
-//==========RECETAS==============
-public void create(Receta e) throws Exception {
-    String idMedico   = (e.getMedico()   != null) ? e.getMedico().getId()   : null;
-    String idPaciente = (e.getPaciente() != null) ? e.getPaciente().getId() : null;
-    recetaDao.create(e, idMedico, idPaciente);
-}
+
+    // =========== RECETAS ==============
+    /**
+     * Crea una Receta y sus Lineas en una única transacción:
+     *  - Inserta la receta (RecetaDao.create) -> la DAO debe asignar el número generado a e.setIdReceta(...)
+     *  - Inserta todas las Lineas asociadas con lineaDao.create(linea, idRecetaGenerada)
+     */
+    public void create(Receta e) throws Exception {
+        Database db = Database.instance();
+        // obtener ids relacionados
+        String idMedico   = (e.getMedico()   != null) ? e.getMedico().getId()   : null;
+        String idPaciente = (e.getPaciente() != null) ? e.getPaciente().getId() : null;
+
+        try {
+            // Iniciar transacción
+            db.setAutoCommit(false);
+
+            // 1) Crear receta (la DAO debe asignar la PK generada dentro de e.setIdReceta(...))
+            recetaDao.create(e, idMedico, idPaciente);
+
+            // 2) Obtener idReceta generado
+            String idRecetaGenerada = e.getIdReceta();
+            if (idRecetaGenerada == null || idRecetaGenerada.trim().isEmpty()) {
+                throw new Exception("No se pudo obtener el número de receta generado por la base de datos.");
+            }
+
+            // 3) Insertar líneas asociadas (si existen)
+            if (e.getDetalles() != null) {
+                for (Linea linea : e.getDetalles()) {
+                    lineaDao.create(linea, idRecetaGenerada);
+                }
+            }
+
+            // 4) Commit
+            db.commit();
+        } catch (Exception ex) {
+            // Rollback ante cualquier fallo
+            db.rollback();
+            throw ex;
+        } finally {
+            // Restaurar autocommit true
+            try {
+                db.setAutoCommit(true);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 
     public Receta read(Receta e) throws Exception {
         return recetaDao.read(e.getIdReceta());
@@ -197,6 +231,7 @@ public void create(Receta e) throws Exception {
         return recetaDao.findByNombre(e);
     }
 
+    // ============ USUARIO ============
     public void create(Usuario e) throws Exception {
         usuarioDao.create(e);
     }
