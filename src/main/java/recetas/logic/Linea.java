@@ -1,12 +1,17 @@
 package recetas.logic;
 
+import java.time.LocalDate;
+
 public class Linea {
 
-    private int numero; // <-- Agregado
+    private int numero; // número de la línea en BD
     private Medicamento medicamento;
     private int cantidad;
     private String indicaciones;
     private int duracionDias;
+
+    // Nueva propiedad: fecha de la receta (para agrupaciones en dashboard)
+    private LocalDate fechaReceta;
 
     public Linea() {}
 
@@ -39,10 +44,14 @@ public class Linea {
     public int getDuracionDias() { return duracionDias; }
     public void setDuracionDias(int duracionDias) { this.duracionDias = duracionDias; }
 
+    public LocalDate getFechaReceta() { return fechaReceta; }
+    public void setFechaReceta(LocalDate fechaReceta) { this.fechaReceta = fechaReceta; }
+
     @Override
     public String toString() {
-        return "Línea #" + numero + ": " +
-                medicamento.getNombre() + " " + medicamento.getPresentacion() +
+        String med = (medicamento != null) ? medicamento.getNombre() : "Sin med";
+        String pres = (medicamento != null) ? medicamento.getPresentacion() : "";
+        return "Línea #" + numero + ": " + med + " " + pres +
                 " x" + cantidad + " [" + indicaciones + ", " + duracionDias + " días]";
     }
 }

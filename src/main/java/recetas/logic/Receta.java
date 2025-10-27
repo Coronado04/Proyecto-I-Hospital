@@ -1,6 +1,5 @@
 package recetas.logic;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,29 +37,44 @@ public class Receta {
         this.detalles = new ArrayList<>();
     }
     public void agregarDetalle(Linea detalle) {
+        if (detalle == null) return;
+        if (detalles == null) detalles = new ArrayList<>();
         detalles.add(detalle);
     }
 
     public void eliminarDetalle(Linea detalle) {
-        detalles.remove(detalle);
+        if (detalles != null) detalles.remove(detalle);
     }
 
     public void modificarDetalle(int index, Linea nuevoDetalle) {
-        detalles.set(index, nuevoDetalle);
+        if (detalles != null && index >= 0 && index < detalles.size()) {
+            detalles.set(index, nuevoDetalle);
+        }
     }
 
     public String getIdReceta() { return idReceta; }
     public Medico getMedico() { return medico; }
     public Paciente getPaciente() { return paciente; }
-    public List<Linea> getDetalles() { return detalles; }
+    public List<Linea> getDetalles() {
+        if (detalles == null) detalles = new ArrayList<>();
+        return detalles;
+    }
     public LocalDate getFechaConfeccion() { return fechaConfeccion; }
     public LocalDate getFechaRetiro() { return fechaRetiro; }
     public Estado getEstado() { return estado; }
 
     public void deleteLinea(Linea e){
-        detalles.remove(e);
+        if (detalles != null) detalles.remove(e);
     }
 
+    // Nuevo setter para que RecetaDao pueda asignar las líneas recuperadas desde BD
+    public void setDetalles(List<Linea> detalles) {
+        if (detalles == null) {
+            this.detalles = new ArrayList<>();
+        } else {
+            this.detalles = detalles;
+        }
+    }
 
     public void setEstado(Estado estado) {
         this.estado = estado;

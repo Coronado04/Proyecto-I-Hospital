@@ -4,6 +4,7 @@ import recetas.logic.Linea;
 import recetas.logic.Medicamento;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,11 +15,6 @@ public class LineaDao {
         db = Database.instance();
     }
 
-    /**
-     * Ahora la FK 'receta' en la tabla Linea es un INT que referencia Receta.numero.
-     * El método acepta idReceta como String (porque el modelo almacena idReceta como String),
-     * pero convierte a int cuando inserta. Si idReceta es null se inserta NULL.
-     */
     public void create(Linea l, String idReceta) throws Exception {
         String sql = "INSERT INTO Linea (receta, medicamento, cantidad, indicaciones, duracionDias) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
@@ -32,6 +28,7 @@ public class LineaDao {
                 stm.setNull(1, Types.INTEGER);
             }
 
+            // medicamento en BD es FK a Medicamento.codigo (en tu SQL es INT); aquí se usa String por compatibilidad con modelo
             stm.setString(2, l.getMedicamento() != null ? l.getMedicamento().getCodigo() : null);
             stm.setInt(3, l.getCantidad());
             stm.setString(4, l.getIndicaciones());
@@ -89,6 +86,11 @@ public class LineaDao {
         }
     }
 
+    /**
+     * Devuelve todas las líneas cuyo medicamento coincida con el filtro (por nombre).
+     * Si filtro.getMedicamento().getNombre() está vacío, devuelve todas las líneas.
+     * Además incluye la fecha de la receta (fechaConfeccion) en cada Linea.fechaReceta.
+     */
     public List<Linea> findByNombre(Linea filtro) {
         List<Linea> resultado = new ArrayList<>();
 
@@ -98,9 +100,11 @@ public class LineaDao {
         }
 
         String sql = "SELECT l.numero, l.cantidad, l.indicaciones, l.duracionDias, " +
-                "m.codigo AS med_codigo, m.nombre AS med_nombre, m.presentacion AS med_presentacion " +
+                "m.codigo AS med_codigo, m.nombre AS med_nombre, m.presentacion AS med_presentacion, " +
+                "r.fechaConfeccion AS rec_fechaConfeccion, r.numero AS rec_numero " +
                 "FROM Linea l " +
                 "LEFT JOIN Medicamento m ON l.medicamento = m.codigo " +
+                "LEFT JOIN Receta r ON l.receta = r.numero " +
                 "WHERE m.nombre LIKE ? " +
                 "ORDER BY l.numero";
 
@@ -119,6 +123,40 @@ public class LineaDao {
         return resultado;
     }
 
+    /**
+     * Devuelve las líneas asociadas a una receta (por su idReceta: string con número).
+     */
+    public List<Linea> findByReceta(String idReceta) {
+        List<Linea> resultado = new ArrayList<>();
+        if (idReceta == null || idReceta.trim().isEmpty()) return resultado;
+
+        String sql = "SELECT l.numero, l.cantidad, l.indicaciones, l.duracionDias, " +
+                "m.codigo AS med_codigo, m.nombre AS med_nombre, m.presentacion AS med_presentacion, " +
+                "r.fechaConfeccion AS rec_fechaConfeccion, r.numero AS rec_numero " +
+                "FROM Linea l " +
+                "LEFT JOIN Medicamento m ON l.medicamento = m.codigo " +
+                "LEFT JOIN Receta r ON l.receta = r.numero " +
+                "WHERE l.receta = ? " +
+                "ORDER BY l.numero";
+
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            try {
+                stm.setInt(1, Integer.parseInt(idReceta));
+            } catch (NumberFormatException ex) {
+                // si no es numérico, no hay líneas
+                return resultado;
+            }
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    resultado.add(from(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return resultado;
+    }
+
     private Linea from(ResultSet rs) throws SQLException {
         Linea l = new Linea();
         Medicamento m = new Medicamento();
@@ -127,18 +165,16 @@ public class LineaDao {
         m.setNombre(rs.getString("med_nombre"));
         m.setPresentacion(rs.getString("med_presentacion"));
 
+        try { l.setNumero(rs.getInt("numero")); } catch (SQLException ignored) {}
+        try { l.setCantidad(rs.getInt("cantidad")); } catch (SQLException ignored) {}
+        try { l.setIndicaciones(rs.getString("indicaciones")); } catch (SQLException ignored) {}
+        try { l.setDuracionDias(rs.getInt("duracionDias")); } catch (SQLException ignored) {}
+
+        // fecha de la receta (puede ser null)
         try {
-            l.setNumero(rs.getInt("numero"));
-        } catch (SQLException ignored) { }
-        try {
-            l.setCantidad(rs.getInt("cantidad"));
-        } catch (SQLException ignored) { }
-        try {
-            l.setIndicaciones(rs.getString("indicaciones"));
-        } catch (SQLException ignored) { }
-        try {
-            l.setDuracionDias(rs.getInt("duracionDias"));
-        } catch (SQLException ignored) { }
+            java.sql.Date d = rs.getDate("rec_fechaConfeccion");
+            if (d != null) l.setFechaReceta(d.toLocalDate());
+        } catch (SQLException ignored) {}
 
         l.setMedicamento(m);
         return l;

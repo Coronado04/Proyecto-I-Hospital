@@ -17,11 +17,6 @@ public class RecetaDao {
         db = Database.instance();
     }
 
-    /**
-     * Ahora la columna PK en la BD es 'numero' AUTO_INCREMENT.
-     * Insertamos sin proporcionar el id, solicitamos generated keys
-     * y asignamos el numero generado a e.setIdReceta(String).
-     */
     public void create(Receta e, String idMedico, String idPaciente) throws Exception {
         String sql = "INSERT INTO Receta (medico, paciente, fechaConfeccion, fechaRetiro, estado) " +
                 "VALUES (?,?,?,?,?)";
@@ -46,7 +41,6 @@ public class RecetaDao {
                     e.setIdReceta(String.valueOf(generated));
                 }
             } catch (SQLException ex) {
-                // no crítico, pero informar
                 ex.printStackTrace();
             }
         }
@@ -62,7 +56,16 @@ public class RecetaDao {
             stm.setInt(1, Integer.parseInt(idReceta));
             try (ResultSet rs = stm.executeQuery()) {
                 if (rs.next()) {
-                    return from(rs);
+                    Receta r = from(rs);
+                    // Cargar líneas asociadas
+                    try {
+                        recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                        r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                    } catch (Exception ex) {
+                        // si falla cargar líneas, no abortar la lectura principal; loguear
+                        ex.printStackTrace();
+                    }
+                    return r;
                 } else {
                     throw new Exception("Receta no existe");
                 }
@@ -134,7 +137,15 @@ public class RecetaDao {
             ResultSet rs = db.executeQuery(stm);
 
             while (rs != null && rs.next()) {
-                resultado.add(from(rs));
+                Receta r = from(rs);
+                // Cargar líneas asociadas para cada receta
+                try {
+                    recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                    r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                resultado.add(r);
             }
         } catch (SQLException e) {
             e.printStackTrace();
