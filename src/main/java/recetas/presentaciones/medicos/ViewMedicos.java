@@ -60,10 +60,10 @@ public class ViewMedicos implements PropertyChangeListener {
 
     public Medico take() {
         Medico e = new Medico();
-      e.setId(IdMedico.getText());
-      e.setEspecialidad(EspecialidadMedico.getText());
-      e.setNombre(NombreMedico.getText());
-      e.setClave(IdMedico.getText());
+        e.setId(IdMedico.getText().trim());
+        e.setEspecialidad(EspecialidadMedico.getText().trim());
+        e.setNombre(NombreMedico.getText().trim());
+        e.setClave(IdMedico.getText().trim());
         return e;
     }
 
@@ -77,7 +77,7 @@ public class ViewMedicos implements PropertyChangeListener {
     void setController(Controller controller) {this.controller = controller;}
 
     public void setModel(Model model) {
-         this.model = model;
+        this.model = model;
         model.addPropertyChangeListener(this);
     }
     public ViewMedicos(){
@@ -105,12 +105,12 @@ public class ViewMedicos implements PropertyChangeListener {
         borrar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            try{
-            controller.delete();
-                JOptionPane.showMessageDialog(panel, "REGISTRO BORRADO", "", JOptionPane.INFORMATION_MESSAGE);
-            }catch(Exception ex){
-            JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+                try{
+                    controller.delete();
+                    JOptionPane.showMessageDialog(panel, "REGISTRO BORRADO", "", JOptionPane.INFORMATION_MESSAGE);
+                }catch(Exception ex){
+                    JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         table1.addMouseListener(new MouseAdapter() {
@@ -125,8 +125,10 @@ public class ViewMedicos implements PropertyChangeListener {
             public void actionPerformed(ActionEvent e) {
                 try{
                     Medico filter = new Medico();
-                    filter.setNombre(NombreBusqueda.getText());
-                    filter.setId(idBusqueda.getText());
+                    String nombre = NombreBusqueda.getText();
+                    String id = idBusqueda.getText();
+                    filter.setNombre(nombre != null ? nombre.trim() : "");
+                    filter.setId(id != null ? id.trim() : "");
                     controller.search(filter);
                 }catch(Exception ex){
                     JOptionPane.showMessageDialog(panel, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);

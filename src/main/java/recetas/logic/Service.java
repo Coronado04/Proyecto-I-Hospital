@@ -3,6 +3,7 @@ package recetas.logic;
 import recetas.data.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Service {
@@ -22,7 +23,7 @@ public class Service {
     private UsuarioDao usuarioDao;
 
     private Service() {
-        try{
+        try {
             medicoDao = new MedicoDao();
             pacienteDao = new PacienteDao();
             farmaceutaDao = new FarmaceutaDao();
@@ -30,14 +31,13 @@ public class Service {
             medicamentoDao = new MedicamentoDao();
             recetaDao = new RecetaDao();
             usuarioDao = new UsuarioDao();
-            // Si quieres crear un usuario admin por defecto, hazlo explícitamente con usuarioDao.create(...)
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
-    public void stop(){
-        try{
+    public void stop() {
+        try {
             Database.instance().close();
         } catch (Exception e) {
             System.out.println(e);
@@ -68,13 +68,29 @@ public class Service {
     }
 
     public List<Medico> search(Medico e) {
-        return medicoDao.findByNombre(e);
+        try {
+            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
+                List<Medico> resultado = new ArrayList<>();
+                try {
+                    Medico m = medicoDao.read(e.getId().trim());
+                    if (m != null) resultado.add(m);
+                } catch (Exception ex) {
+                }
+                return resultado;
+            } else {
+                return medicoDao.findByNombre(e);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // ============= Paciente ============
     public void create(Paciente e) throws Exception {
         pacienteDao.create(e);
     }
+
     public Paciente read(Paciente e) throws Exception {
         return pacienteDao.read(e.getId());
     }
@@ -88,11 +104,28 @@ public class Service {
         filtro.setNombre("");
         return pacienteDao.findByNombre(filtro);
     }
+
     public void delete(Paciente e) throws Exception {
         pacienteDao.delete(e);
     }
+
     public List<Paciente> search(Paciente e) {
-        return pacienteDao.findByNombre(e);
+        try {
+            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
+                List<Paciente> resultado = new ArrayList<>();
+                try {
+                    Paciente p = pacienteDao.read(e.getId().trim());
+                    if (p != null) resultado.add(p);
+                } catch (Exception ex) {
+                }
+                return resultado;
+            } else {
+                return pacienteDao.findByNombre(e);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // =============== Medicamentos ===============
@@ -115,8 +148,24 @@ public class Service {
     public void delete(Medicamento e) throws Exception {
         medicamentoDao.delete(e);
     }
+
     public List<Medicamento> search(Medicamento e) {
-        return medicamentoDao.findByNombre(e);
+        try {
+            if (e != null && e.getCodigo() != null && !e.getCodigo().trim().isEmpty()) {
+                List<Medicamento> resultado = new ArrayList<>();
+                try {
+                    Medicamento m = medicamentoDao.read(e.getCodigo().trim());
+                    if (m != null) resultado.add(m);
+                } catch (Exception ex) {
+                }
+                return resultado;
+            } else {
+                return medicamentoDao.findByNombre(e);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // ============= Farmaceuta ===============
@@ -135,8 +184,24 @@ public class Service {
     public void delete(Farmaceuta e) throws Exception {
         farmaceutaDao.delete(e);
     }
-    public List<Farmaceuta> search(Farmaceuta e){
-        return farmaceutaDao.findByNombre(e);
+
+    public List<Farmaceuta> search(Farmaceuta e) {
+        try {
+            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
+                List<Farmaceuta> resultado = new ArrayList<>();
+                try {
+                    Farmaceuta f = farmaceutaDao.read(e.getId().trim());
+                    if (f != null) resultado.add(f);
+                } catch (Exception ex) {
+                }
+                return resultado;
+            } else {
+                return farmaceutaDao.findByNombre(e);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // ============ LINEA ==============
@@ -160,45 +225,28 @@ public class Service {
     }
 
     // =========== RECETAS ==============
-    /**
-     * Crea una Receta y sus Lineas en una única transacción:
-     *  - Inserta la receta (RecetaDao.create) -> la DAO debe asignar el número generado a e.setIdReceta(...)
-     *  - Inserta todas las Lineas asociadas con lineaDao.create(linea, idRecetaGenerada)
-     */
     public void create(Receta e) throws Exception {
         Database db = Database.instance();
-        // obtener ids relacionados
-        String idMedico   = (e.getMedico()   != null) ? e.getMedico().getId()   : null;
+        String idMedico = (e.getMedico() != null) ? e.getMedico().getId() : null;
         String idPaciente = (e.getPaciente() != null) ? e.getPaciente().getId() : null;
 
         try {
-            // Iniciar transacción
             db.setAutoCommit(false);
-
-            // 1) Crear receta (la DAO debe asignar la PK generada dentro de e.setIdReceta(...))
             recetaDao.create(e, idMedico, idPaciente);
-
-            // 2) Obtener idReceta generado
             String idRecetaGenerada = e.getIdReceta();
             if (idRecetaGenerada == null || idRecetaGenerada.trim().isEmpty()) {
                 throw new Exception("No se pudo obtener el número de receta generado por la base de datos.");
             }
-
-            // 3) Insertar líneas asociadas (si existen)
             if (e.getDetalles() != null) {
                 for (Linea linea : e.getDetalles()) {
                     lineaDao.create(linea, idRecetaGenerada);
                 }
             }
-
-            // 4) Commit
             db.commit();
         } catch (Exception ex) {
-            // Rollback ante cualquier fallo
             db.rollback();
             throw ex;
         } finally {
-            // Restaurar autocommit true
             try {
                 db.setAutoCommit(true);
             } catch (SQLException ex) {
@@ -228,7 +276,22 @@ public class Service {
     }
 
     public List<Receta> search(Receta e) {
-        return recetaDao.findByNombre(e);
+        try {
+
+            if (e != null && e.getPaciente() != null && e.getPaciente().getId() != null && !e.getPaciente().getId().trim().isEmpty()) {
+                String idPaciente = e.getPaciente().getId().trim();
+                try {
+                    return recetaDao.findByPaciente(idPaciente);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return new ArrayList<>();
+                }
+            }
+            return recetaDao.findByNombre(e);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // ============ USUARIO ============
@@ -255,7 +318,22 @@ public class Service {
     }
 
     public List<Usuario> search(Usuario e) {
-        return usuarioDao.findByNombre(e);
+        try {
+            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
+                List<Usuario> resultado = new ArrayList<>();
+                try {
+                    Usuario u = usuarioDao.read(e.getId().trim());
+                    if (u != null) resultado.add(u);
+                } catch (Exception ex) {
+                }
+                return resultado;
+            } else {
+                return usuarioDao.findByNombre(e);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }
 

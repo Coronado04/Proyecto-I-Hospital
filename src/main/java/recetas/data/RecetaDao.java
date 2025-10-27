@@ -125,30 +125,74 @@ public class RecetaDao {
                     && filtro.getPaciente().getNombre() != null
                     && !filtro.getPaciente().getNombre().trim().isEmpty());
 
-            PreparedStatement stm;
             if (usarFiltro) {
-                sql += " WHERE pa.nombre LIKE ?";
-                stm = db.prepareStatement(sql);
-                stm.setString(1, "%" + filtro.getPaciente().getNombre().trim() + "%");
-            } else {
-                stm = db.prepareStatement(sql);
-            }
-
-            ResultSet rs = db.executeQuery(stm);
-
-            while (rs != null && rs.next()) {
-                Receta r = from(rs);
-                // Cargar líneas asociadas para cada receta
-                try {
-                    recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
-                    r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                sql += " WHERE pa.nombre LIKE ? ORDER BY r.fechaConfeccion DESC";
+                try (PreparedStatement stm = db.prepareStatement(sql)) {
+                    stm.setString(1, "%" + filtro.getPaciente().getNombre().trim() + "%");
+                    try (ResultSet rs = stm.executeQuery()) {
+                        while (rs.next()) {
+                            Receta r = from(rs);
+                            // Cargar líneas asociadas para cada receta
+                            try {
+                                recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                                r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            resultado.add(r);
+                        }
+                    }
                 }
-                resultado.add(r);
+            } else {
+                sql += " ORDER BY r.fechaConfeccion DESC";
+                try (PreparedStatement stm = db.prepareStatement(sql);
+                     ResultSet rs = stm.executeQuery()) {
+                    while (rs.next()) {
+                        Receta r = from(rs);
+                        try {
+                            recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                            r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                        resultado.add(r);
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return resultado;
+    }
+
+    /**
+     * Nuevo: busca todas las recetas asociadas a un paciente (por id de paciente).
+     */
+    public List<Receta> findByPaciente(String pacienteId) {
+        List<Receta> resultado = new ArrayList<>();
+        String sql = "SELECT r.*, me.nombre AS me_nombre, pa.nombre AS pa_nombre " +
+                "FROM Receta r " +
+                "LEFT JOIN Medico me ON r.medico = me.id " +
+                "LEFT JOIN Paciente pa ON r.paciente = pa.id " +
+                "WHERE r.paciente = ? " +
+                "ORDER BY r.fechaConfeccion DESC";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            stm.setString(1, pacienteId);
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    Receta r = from(rs);
+                    // cargar líneas de la receta
+                    try {
+                        recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                        r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    resultado.add(r);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
         return resultado;
     }

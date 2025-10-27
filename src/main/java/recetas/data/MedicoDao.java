@@ -15,7 +15,7 @@ public class MedicoDao {
     }
 
     public void create(Medico m) throws SQLException {
-        String sql="insert into medico(id, clave, nombre, especialidad) values(?,?,?,?)";
+        String sql = "INSERT INTO Medico(id, clave, nombre, especialidad) VALUES (?,?,?,?)";
         try (PreparedStatement ps = db.prepareStatement(sql)) {
             ps.setString(1, m.getId());
             ps.setString(2, m.getClave());
@@ -29,7 +29,7 @@ public class MedicoDao {
     }
 
     public Medico read(String id) throws Exception{
-        String sql="select * from Medico m where m.id=?";
+        String sql = "SELECT id, nombre, especialidad, clave FROM Medico WHERE id = ?";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             stm.setString(1, id);
             try (ResultSet rs = stm.executeQuery()) {
@@ -43,7 +43,7 @@ public class MedicoDao {
     }
 
     public void update(Medico m)throws Exception{
-        String sql="update Medico set clave=?, nombre=?, especialidad=? where id=?";
+        String sql="UPDATE Medico SET clave=?, nombre=?, especialidad=? WHERE id=?";
         try (PreparedStatement ps = db.prepareStatement(sql)) {
             ps.setString(1, m.getClave());
             ps.setString(2, m.getNombre());
@@ -56,7 +56,7 @@ public class MedicoDao {
         }
     }
     public void delete(Medico m)throws Exception{
-        String sql="delete from Medico where id=?";
+        String sql="DELETE FROM Medico WHERE id=?";
         try (PreparedStatement stm=db.prepareStatement(sql)) {
             stm.setString(1, m.getId());
             int count = stm.executeUpdate();
@@ -68,7 +68,7 @@ public class MedicoDao {
 
     public List<Medico> findByNombre(Medico filtro){
         List<Medico> resultado= new ArrayList<Medico>();
-        String sql = "select * from Medico m where m.nombre like ? order by m.nombre";
+        String sql = "SELECT id, nombre, especialidad, clave FROM Medico WHERE nombre LIKE ? ORDER BY nombre";
         String nombreFiltro = "";
         if (filtro != null && filtro.getNombre() != null) {
             nombreFiltro = filtro.getNombre().trim();

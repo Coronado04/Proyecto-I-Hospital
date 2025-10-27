@@ -1,7 +1,6 @@
 package recetas.presentaciones.medicamentos;
 
 import recetas.Application;
-import recetas.logic.Farmaceuta;
 import recetas.logic.Medicamento;
 
 import javax.swing.*;
@@ -32,7 +31,7 @@ public class ViewMedicamentos implements PropertyChangeListener {
         return panel;
     }
 
-    public ViewMedicamentos(){
+    public ViewMedicamentos() {
 
         guardar.addActionListener(new ActionListener() {
             @Override
@@ -58,10 +57,10 @@ public class ViewMedicamentos implements PropertyChangeListener {
         borrar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try{
+                try {
                     controller.delete();
                     JOptionPane.showMessageDialog(panel, "REGISTRO BORRADO", "", JOptionPane.INFORMATION_MESSAGE);
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -79,11 +78,12 @@ public class ViewMedicamentos implements PropertyChangeListener {
                 try {
                     Medicamento filter = new Medicamento();
 
-                    String codigoTxt = codigoBuscar.getText().trim();
-                    String descTxt   = descripcionBuscar.getText().trim();
+                    String codigoTxt = codigoBuscar.getText() != null ? codigoBuscar.getText().trim() : "";
+                    String descTxt = descripcionBuscar.getText() != null ? descripcionBuscar.getText().trim() : "";
 
-                    filter.setCodigo(codigoTxt);
-                    filter.setPresentacion(descTxt);
+                    filter.setCodigo(codigoTxt.isEmpty() ? null : codigoTxt);
+                    // La búsqueda por "descripcionBuscar" es en realidad por nombre
+                    filter.setNombre(descTxt);
 
                     controller.search(filter);
 
@@ -100,13 +100,13 @@ public class ViewMedicamentos implements PropertyChangeListener {
         reporte.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try{
+                try {
                     controller.print();
-                    if(Desktop.isDesktopSupported()){
+                    if (Desktop.isDesktopSupported()) {
                         File file = new File("medicamentos.pdf");
                         Desktop.getDesktop().open(file);
                     }
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -120,7 +120,7 @@ public class ViewMedicamentos implements PropertyChangeListener {
             valid = false;
             codigo.setBackground(Application.BACKGROUND_ERROR);
             codigo.setToolTipText("Codigo requerido");
-        }else {
+        } else {
             codigo.setBackground(Color.WHITE);
             codigo.setToolTipText(null);
         }
@@ -128,15 +128,15 @@ public class ViewMedicamentos implements PropertyChangeListener {
             valid = false;
             nombre.setBackground(Application.BACKGROUND_ERROR);
             nombre.setToolTipText("Nombre requerido");
-        }else{
+        } else {
             nombre.setBackground(Color.WHITE);
             nombre.setToolTipText(null);
         }
-        if(presentacion.getText().isEmpty()) {
+        if (presentacion.getText().isEmpty()) {
             valid = false;
             presentacion.setBackground(Application.BACKGROUND_ERROR);
             presentacion.setToolTipText("Presentacion requerida");
-        }else{
+        } else {
             presentacion.setBackground(Color.WHITE);
             presentacion.setToolTipText(null);
         }
@@ -145,18 +145,19 @@ public class ViewMedicamentos implements PropertyChangeListener {
 
     public Medicamento take() {
         Medicamento e = new Medicamento();
-        e.setCodigo(codigo.getText());
-        e.setNombre(nombre.getText());
-        e.setPresentacion(presentacion.getText());
+        e.setCodigo(codigo.getText().trim());
+        e.setNombre(nombre.getText().trim());
+        e.setPresentacion(presentacion.getText().trim());
         return e;
     }
-
 
 
     private Controller controller;
     private Model model;
 
-    public void setController(Controller controller) {this.controller = controller;}
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
 
     public void setModel(Model model) {
         this.model = model;
@@ -164,13 +165,12 @@ public class ViewMedicamentos implements PropertyChangeListener {
     }
 
 
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case Model.LIST:
                 int[] cols = {TableModel.CODIGO, TableModel.NOMBRE, TableModel.PRESENTACION};
-                table.setModel(new TableModel(cols,model.getListaMedicamento()));
+                table.setModel(new TableModel(cols, model.getListaMedicamento()));
                 break;
             case Model.CURRENT:
                 codigo.setText(model.getCurrent().getCodigo());
@@ -194,13 +194,11 @@ public class ViewMedicamentos implements PropertyChangeListener {
                 presentacion.setToolTipText(null);
                 break;
             case Model.FILTER:
-                descripcionBuscar.setText(model.getFilter().getPresentacion());
+                // mostrar el nombre en el campo de descripción de filtro
+                descripcionBuscar.setText(model.getFilter().getNombre() != null ? model.getFilter().getNombre() : "");
                 break;
         }
         this.panel.revalidate();
     }
-
-
-
 
 }
