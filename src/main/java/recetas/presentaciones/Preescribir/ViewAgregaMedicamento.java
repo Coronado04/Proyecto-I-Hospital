@@ -81,19 +81,25 @@ public class ViewAgregaMedicamento extends JDialog implements PropertyChangeList
 
             private void updateMedicamentoList() {
                 try {
-                    Medicamento Filtro = new Medicamento();
+                    Medicamento filtroMedicamento = new Medicamento();
                     String texto = dato.getText().trim();
                     String opcion = (filtro.getSelectedItem() == null) ? "Codigo" : filtro.getSelectedItem().toString();
 
                     if ("Codigo".equalsIgnoreCase(opcion)) {
-                        Filtro.setCodigo(texto);
-                        Filtro.setPresentacion("");
+                        filtroMedicamento.setCodigo(texto);
+                        filtroMedicamento.setNombre("");
+                        filtroMedicamento.setPresentacion("");
+                    } else if ("Descripcion".equalsIgnoreCase(opcion)) {
+                        filtroMedicamento.setNombre(texto);
+                        filtroMedicamento.setCodigo("");
+                        filtroMedicamento.setPresentacion("");
                     } else {
-                        Filtro.setPresentacion(texto);
-                        Filtro.setCodigo("");
+                        filtroMedicamento.setPresentacion(texto);
+                        filtroMedicamento.setCodigo("");
+                        filtroMedicamento.setNombre("");
                     }
 
-                    controller.searchMedicamento(Filtro);
+                    controller.searchMedicamento(filtroMedicamento);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel1, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);
                 }
