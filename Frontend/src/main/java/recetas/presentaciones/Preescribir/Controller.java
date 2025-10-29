@@ -1,6 +1,7 @@
 package recetas.presentaciones.Preescribir;
 
 import progra3.logic.*;
+import recetas.logic.Service;
 
 
 import javax.swing.*;
