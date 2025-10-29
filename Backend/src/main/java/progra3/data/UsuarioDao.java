@@ -1,6 +1,7 @@
-package recetas.data;
+package progra3.data;
 
-import recetas.logic.Usuario;
+
+import progra3.logic.Usuario;
 
 import java.sql.*;
 import java.util.ArrayList;

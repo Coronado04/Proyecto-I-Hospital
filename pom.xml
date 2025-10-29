@@ -11,6 +11,7 @@
     <modules>
         <module>Protocol</module>
         <module>Frontend</module>
+        <module>Backend</module>
     </modules>
 
     <properties>

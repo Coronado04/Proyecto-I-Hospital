@@ -1,7 +1,10 @@
 package recetas;
-import progra3.logic.Sesion;
 import progra3.logic.Usuario;
 import recetas.logic.Service;
+import java.net.Socket;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import progra3.logic.Protocol;
 
 import recetas.presentaciones.Despacho.ViewDespacho;
 import recetas.presentaciones.Preescribir.ViewPreescribir;
@@ -39,12 +42,34 @@ public class Application {
         }
     }
 
-    private static void doLogin(){
-        Model model = new Model();
-        ViewlogIn view = new ViewlogIn(null);
-        recetas.presentaciones.logIn.Controller controller=new recetas.presentaciones.logIn.Controller(model, view);
-        view.setVisible(true);
+    private static void doLogin() {
+        try {
+            // 🔹 Conectarse al servidor (Backend)
+            Socket socket = new Socket(Protocol.SERVER, Protocol.PORT);
+            ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
+
+            // 🔹 Crear modelo y vista
+            Model model = new Model();
+            ViewlogIn view = new ViewlogIn(null);
+
+            // 🔹 Crear controlador e inyectar streams
+            recetas.presentaciones.logIn.Controller controller =
+                    new recetas.presentaciones.logIn.Controller(model, view);
+            controller.setStreams(os, is); // <--- Este método lo agregaste antes
+
+            // 🔹 Mostrar la ventana de login
+            view.setVisible(true);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Error al conectar con el servidor: " + ex.getMessage(),
+                    "Error de conexión",
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
     }
+
 
     private static void doRun() {
         ventana = new JFrame();

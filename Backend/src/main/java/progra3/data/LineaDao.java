@@ -1,7 +1,9 @@
-package recetas.data;
+package progra3.data;
 
-import recetas.logic.Linea;
-import recetas.logic.Medicamento;
+
+
+import progra3.logic.Linea;
+import progra3.logic.Medicamento;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -171,7 +173,7 @@ public class LineaDao {
 
         // fecha de la receta (puede ser null)
         try {
-            java.sql.Date d = rs.getDate("rec_fechaConfeccion");
+            Date d = rs.getDate("rec_fechaConfeccion");
             if (d != null) l.setFechaReceta(d.toLocalDate());
         } catch (SQLException ignored) {}
 
