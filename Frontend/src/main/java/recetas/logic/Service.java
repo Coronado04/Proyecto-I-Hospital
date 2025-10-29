@@ -377,20 +377,25 @@ public class Service {
 
     public List<Receta> search(Receta e) {
         try {
+            // os e is deben ser ObjectOutputStream / ObjectInputStream asociados al socket
+            os.writeInt(Protocol.RECETA_SEARCH); // enviar código de operación
+            os.writeObject(e);                   // enviar filtro (puede ser null)
+            os.flush();
 
-            if (e != null && e.getPaciente() != null && e.getPaciente().getId() != null && !e.getPaciente().getId().trim().isEmpty()) {
-                String idPaciente = e.getPaciente().getId().trim();
-                try {
-                    return recetaDao.findByPaciente(idPaciente);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    return new ArrayList<>();
-                }
+            int status = is.readInt();           // leer código de respuesta
+            if (status == Protocol.ERROR_NO_ERROR) {
+                return (List<Receta>) is.readObject(); // recibir la lista de recetas
+            } else {
+                // el servidor devolvió un error, puedes leer un mensaje si lo envía
+                // String msg = (String) is.readObject();
+                return List.of();
             }
-            return recetaDao.findByNombre(e);
         } catch (Exception ex) {
+            // Manejo de excepción: loguear y, si quieres, fallback a llamada local
             ex.printStackTrace();
-            return new ArrayList<>();
+            // Opcional: fallback local si el DAO está disponible:
+            // try { return recetaDao.findByNombre(e); } catch(Exception e2) { return new ArrayList<>(); }
+            throw new RuntimeException(ex);
         }
     }
 
