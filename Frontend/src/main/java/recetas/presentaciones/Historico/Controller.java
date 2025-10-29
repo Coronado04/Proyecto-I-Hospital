@@ -3,10 +3,14 @@ package recetas.presentaciones.Historico;
 import progra3.logic.Receta;
 import recetas.Application;
 import recetas.logic.Service;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
-public class Controller {
+public class Controller implements ThreadListener {
     private ViewHistorico viewHistorico;
     private Model model;
+
+    Refresher refresher;
 
 
     public Controller(ViewHistorico viewHistorico, Model model) {
@@ -15,6 +19,9 @@ public class Controller {
         this.model = model;
         viewHistorico.setController(this);
         viewHistorico.setModel(model);
+
+        refresher = new Refresher(this);
+        refresher.start();
     }
     public void search(Receta filter){
         model.setFilter(filter);
@@ -53,5 +60,16 @@ public class Controller {
     public void clear(){
         model.setMode(Application.MODE_CREATE);
         model.setCurrent(new Receta());
+    }
+
+    @Override
+    public void refresh() {
+        try {
+            model.setListaReceta(Service.instance().search(model.getFilter()));
+        } catch (Exception e) {}
+    }
+
+    public void stop(){
+        refresher.stop();
     }
 }

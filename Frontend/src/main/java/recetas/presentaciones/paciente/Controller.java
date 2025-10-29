@@ -17,12 +17,16 @@ import com.itextpdf.layout.properties.TextAlignment;
 import progra3.logic.Paciente;
 import recetas.Application;
 import recetas.logic.Service;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
 import java.util.List;
 
-public class Controller {
+public class Controller implements ThreadListener {
     private ViewPaciente view;
     private Model model;
+
+    Refresher refresher;
 
     public void search(Paciente filter){
         model.setFilter(filter);
@@ -36,6 +40,9 @@ public class Controller {
         this.model = model;
         view.setController(this);
         view.setModel(model);
+
+        refresher = new Refresher(this);
+        refresher.start();
     }
     public void create(Paciente e) throws  Exception{
         Service.instance().create(e);
@@ -165,6 +172,17 @@ public class Controller {
             }
         });
     }
+    @Override
+    public void refresh() {
+        try {
+            model.setListaPaciente(Service.instance().search(model.getFilter()));
+        } catch (Exception e) {}
+    }
+
+    public void stop(){
+        refresher.stop();
+    }
+
 
 
 }

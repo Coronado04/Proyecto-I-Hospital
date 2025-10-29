@@ -4,10 +4,14 @@ import progra3.logic.Receta;
 import recetas.Application;
 
 import recetas.logic.Service;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
-public class Controller {
+public class Controller implements ThreadListener {
     protected ViewDespacho viewDespacho;
     private Model model;
+
+    Refresher refresher;
 
     public Controller(ViewDespacho viewDespacho, Model model) {
         model.init(Service.instance().search(new Receta()));
@@ -15,6 +19,11 @@ public class Controller {
         this.model = model;
         viewDespacho.setController(this);
         viewDespacho.setModel(model);
+
+        refresher = new Refresher(this);
+        refresher.start();
+
+
     }
     public void search(Receta filter){
         model.setFilter(filter);
@@ -88,6 +97,17 @@ public class Controller {
         r.setEstado(Receta.Estado.ENTREGADA);
         Service.instance().update(r);
         search(model.getFilter());
+    }
+
+    @Override
+    public void refresh() {
+        try {
+            model.setListaRecetas(Service.instance().search(model.getFilter()));
+        } catch (Exception e) {}
+    }
+
+    public void stop(){
+        refresher.stop();
     }
 
 }
