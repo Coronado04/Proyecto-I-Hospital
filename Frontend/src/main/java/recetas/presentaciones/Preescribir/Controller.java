@@ -2,6 +2,8 @@ package recetas.presentaciones.Preescribir;
 
 import progra3.logic.*;
 import recetas.logic.Service;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
 
 import javax.swing.*;
@@ -9,9 +11,12 @@ import javax.swing.*;
 import java.time.LocalDate;
 import java.util.List;
 
-public class Controller {
+public class Controller  implements ThreadListener{
     private ViewPreescribir view;
     private Model model;
+
+    Refresher refresher;
+
 
     public Controller(ViewPreescribir view, Model model, Usuario u) {
         model.init(
@@ -34,6 +39,10 @@ public class Controller {
         view.setController(this);
         view.setModel(model);
         setCurrentMedico(actual.getFirst());
+
+        refresher = new Refresher(this);
+        refresher.start();
+
     }
 
 
@@ -114,5 +123,17 @@ public class Controller {
 
 
     }
+    @Override
+    public void refresh() {
+        try {
+            model.setMedicamentos(Service.instance().search(new Medicamento()));
+            model.setPacientes(Service.instance().search(new Paciente()));
+        } catch (Exception e) {}
+    }
+
+    public void stop(){
+        refresher.stop();
+    }
+
 }
 

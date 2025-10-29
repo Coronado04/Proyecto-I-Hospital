@@ -18,10 +18,14 @@ import progra3.logic.Farmaceuta;
 import recetas.Application;
 
 import recetas.logic.Service;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
-public class Controller {
+public class Controller implements ThreadListener {
     private ViewFarmaceutas view;
     private Model model;
+
+    Refresher refresher;
 
     public Controller(ViewFarmaceutas view, Model model) {
         model.init(Service.instance().search(new Farmaceuta()));
@@ -29,6 +33,9 @@ public class Controller {
         this.model = model;
         view.setController(this);
         view.setModel(model);
+
+        refresher = new Refresher(this);
+        refresher.start();
     }
 
     public void search(Farmaceuta filter){
@@ -115,6 +122,17 @@ public class Controller {
         cell.setTextAlignment(alignment);
         if(!hasBorder) cell.setBorder(Border.NO_BORDER);
         return cell;
+    }
+
+    @Override
+    public void refresh() {
+        try {
+            model.setListaFarmaceutas(Service.instance().search(model.getFilter()));
+        } catch (Exception e) {}
+    }
+
+    public void stop(){
+        refresher.stop();
     }
 
 

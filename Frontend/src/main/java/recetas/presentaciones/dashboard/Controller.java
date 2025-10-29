@@ -21,10 +21,14 @@ import org.jfree.chart.JFreeChart;
 
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.chart.plot.PiePlot;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
-public class Controller {
+public class Controller implements ThreadListener {
     private Model model;
     private ViewDashboard viewDashboard;
+
+    Refresher refresher;
 
     public Controller(ViewDashboard viewDashboard, Model model) {
         model.init(Service.instance().findAllMedicamentos());
@@ -32,6 +36,9 @@ public class Controller {
         this.model = model;
         viewDashboard.setController(this);
         viewDashboard.setModel(model);
+
+        refresher = new Refresher(this);
+        refresher.start();
     }
 
     public void add(Medicamento m) throws Exception {
@@ -230,6 +237,16 @@ public class Controller {
         viewDashboard.getGraficoRecetas().add(chartPanel, BorderLayout.CENTER);
         viewDashboard.getGraficoRecetas().revalidate();
         viewDashboard.getGraficoRecetas().repaint();
+    }
+
+    @Override
+    public void refresh() {
+        try {
+            model.setList(Service.instance().search(new Medicamento()));
+        } catch (Exception e) {}
+    }
+    public void stop(){
+        refresher.stop();
     }
 
 }

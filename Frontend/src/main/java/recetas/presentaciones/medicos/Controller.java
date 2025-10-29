@@ -18,10 +18,14 @@ import com.itextpdf.layout.properties.TextAlignment;
 import recetas.Application;
 import recetas.logic.Service;
 import progra3.logic.Medico;
+import recetas.presentaciones.Refresher;
+import recetas.presentaciones.ThreadListener;
 
-public class Controller {
+public class Controller implements ThreadListener {
     private ViewMedicos view;
     private Model model;
+
+    Refresher refresher;
 
     public void search(Medico filter) throws Exception{
         model.setFilter(filter);
@@ -35,6 +39,9 @@ public class Controller {
         this.model = model;
         view.setController(this);
         view.setModel(model);
+
+        refresher = new Refresher(this);
+        refresher.start();
     }
 
     public void save(Medico e) throws Exception{
@@ -113,6 +120,17 @@ public class Controller {
         cell.setTextAlignment(alignment);
         if(!hasBorder) cell.setBorder(Border.NO_BORDER);
         return cell;
+    }
+
+    @Override
+    public void refresh() {
+        try {
+            model.setListaMedico(Service.instance().search(model.getFilter()));
+        } catch (Exception e) {}
+    }
+
+    public void stop(){
+        refresher.stop();
     }
 
 
