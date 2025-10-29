@@ -1,10 +1,9 @@
-package recetas.data;
+package progra3.pos.data;
 
 import recetas.logic.Linea;
 import recetas.logic.Medicamento;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

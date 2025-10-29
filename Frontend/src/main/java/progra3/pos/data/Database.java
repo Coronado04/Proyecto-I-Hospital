@@ -1,4 +1,4 @@
-package recetas.data;
+package progra3.pos.data;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -15,7 +15,7 @@ public class Database {
         }
         return theInstance;
     }
-    public static final String PROPERTIES_FILE_NAME="/database.properties";
+    public static final String PROPERTIES_FILE_NAME= "/database.properties";
     Connection cnx;
     public Database(){
         cnx=this.getConnection();
