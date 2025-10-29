@@ -127,21 +127,21 @@ public class Service {
         else throw new Exception("PACIENTE NO EXISTE");
     }
 
-   public List<Paciente> findAllPaciente() {
-       try {
-           os.writeInt(Protocol.PACIENTE_FIND_ALL);
-           os.writeObject(new Paciente());
-           os.flush();
-           if (is.readInt() == Protocol.ERROR_NO_ERROR) {
-               return (List<Paciente>) is.readObject();
-           } else {
-               return new ArrayList<>();
-           }
-       } catch (Exception ex) {
-           ex.printStackTrace();
-           return new ArrayList<>();
-       }
-   }
+    public List<Paciente> findAllPaciente() {
+        try {
+            os.writeInt(Protocol.PACIENTE_FIND_ALL);
+            os.writeObject(new Paciente());
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Paciente>) is.readObject();
+            } else {
+                return new ArrayList<>();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
     public void delete(Paciente e) throws Exception {
         os.writeInt(Protocol.PACIENTE_DELETE);
         os.writeObject(e);
@@ -277,21 +277,39 @@ public class Service {
     // ============ LINEA ==============
     public void create(Linea l, String idReceta) throws Exception {
         if (idReceta == null || idReceta.isEmpty()) {
-            throw new Exception("La línea debe pertenecer a una receta existente");
+            throw new Exception("La Línea debe pertenecer a una receta existente");
         }
         lineaDao.create(l, idReceta);
     }
 
     public Linea read(Linea e) throws Exception {
-        return lineaDao.read(e.getNumero());
+        os.writeInt(Protocol.LINEA_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Linea) is.readObject();
+        else throw new Exception("LINEA NO EXISTE");
     }
 
     public void delete(Linea e) throws Exception {
-        lineaDao.delete(e.getNumero());
+        os.writeInt(Protocol.LINEA_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("LINEA NO EXISTE");
     }
 
     public List<Linea> search(Linea e) {
-        return lineaDao.findByNombre(e);
+        try {
+            os.writeInt(Protocol.LINEA_SEARCH);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Linea>) is.readObject();
+            }
+            else return List.of();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     // =========== RECETAS ==============
@@ -305,7 +323,7 @@ public class Service {
             recetaDao.create(e, idMedico, idPaciente);
             String idRecetaGenerada = e.getIdReceta();
             if (idRecetaGenerada == null || idRecetaGenerada.trim().isEmpty()) {
-                throw new Exception("No se pudo obtener el número de receta generado por la base de datos.");
+                throw new Exception("No se pudo obtener el nÃºmero de receta generado por la base de datos.");
             }
             if (e.getDetalles() != null) {
                 for (Linea linea : e.getDetalles()) {
@@ -326,11 +344,19 @@ public class Service {
     }
 
     public Receta read(Receta e) throws Exception {
-        return recetaDao.read(e.getIdReceta());
+        os.writeInt(Protocol.RECETA_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Receta) is.readObject();
+        else throw new Exception("RECETA NO EXISTE");
     }
 
     public void update(Receta e) throws Exception {
-        recetaDao.update(e, e.getIdReceta());
+        os.writeInt(Protocol.RECETA_UPDATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("RECETA NO EXISTE");
     }
 
     public List<Receta> findAllRecetas() {
@@ -342,7 +368,11 @@ public class Service {
     }
 
     public void delete(Receta e) throws Exception {
-        recetaDao.delete(e.getIdReceta());
+        os.writeInt(Protocol.RECETA_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("RECETA NO EXISTE");
     }
 
     public List<Receta> search(Receta e) {
@@ -366,43 +396,54 @@ public class Service {
 
     // ============ USUARIO ============
     public void create(Usuario e) throws Exception {
-        usuarioDao.create(e);
+        os.writeInt(Protocol.USUARIO_CREATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("USUARIO DUPLICADO");
     }
 
     public Usuario read(Usuario e) throws Exception {
-        return usuarioDao.read(e.getId());
+        os.writeInt(Protocol.USUARIO_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Usuario) is.readObject();
+        else throw new Exception("USUARIO NO EXISTE");
     }
 
     public void update(Usuario e) throws Exception {
-        usuarioDao.update(e);
+        os.writeInt(Protocol.USUARIO_UPDATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("USUARIO NO EXISTE");
     }
 
-    public List<Usuario> findAllUsuarios() {
-        Usuario filtro = new Usuario();
-        filtro.setNombre("");
-        return usuarioDao.findByNombre(filtro);
-    }
+//    public List<Usuario> findAllUsuarios() {
+//        Usuario filtro = new Usuario();
+//        filtro.setNombre("");
+//        return usuarioDao.findByNombre(filtro);
+//    }
 
     public void delete(Usuario e) throws Exception {
-        usuarioDao.delete(e);
+        os.writeInt(Protocol.USUARIO_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("USUARIO NO EXISTE");
     }
 
     public List<Usuario> search(Usuario e) {
         try {
-            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
-                List<Usuario> resultado = new ArrayList<>();
-                try {
-                    Usuario u = usuarioDao.read(e.getId().trim());
-                    if (u != null) resultado.add(u);
-                } catch (Exception ex) {
-                }
-                return resultado;
-            } else {
-                return usuarioDao.findByNombre(e);
+            os.writeInt(Protocol.USUARIO_SEARCH);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Usuario>) is.readObject();
             }
+            else return List.of();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new ArrayList<>();
+            throw new RuntimeException(ex);
         }
     }
 }
@@ -418,4 +459,3 @@ public class Service {
 //                .max()
 //                .orElse(0) + 1;
 //    }
-
