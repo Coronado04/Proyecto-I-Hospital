@@ -1,8 +1,11 @@
 package recetas.logic;
 
 
-import recetas.data.*;
+import progra3.logic.Protocol;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,24 +17,15 @@ public class Service {
         if (theInstance == null) theInstance = new Service();
         return theInstance;
     }
-
-    private MedicoDao medicoDao;
-    private PacienteDao pacienteDao;
-    private FarmaceutaDao farmaceutaDao;
-    private LineaDao lineaDao;
-    private MedicamentoDao medicamentoDao;
-    private RecetaDao recetaDao;
-    private UsuarioDao usuarioDao;
+    Socket s;
+    ObjectOutputStream os;
+    ObjectInputStream is;
 
     private Service() {
         try {
-            medicoDao = new MedicoDao();
-            pacienteDao = new PacienteDao();
-            farmaceutaDao = new FarmaceutaDao();
-            lineaDao = new LineaDao();
-            medicamentoDao = new MedicamentoDao();
-            recetaDao = new RecetaDao();
-            usuarioDao = new UsuarioDao();
+            s = new Socket(Protocol.SERVER, Protocol.PORT);
+            os = new ObjectOutputStream(s.getOutputStream());
+            is = new ObjectInputStream(s.getInputStream());
         } catch (Exception e) {
             System.out.println(e);
         }
