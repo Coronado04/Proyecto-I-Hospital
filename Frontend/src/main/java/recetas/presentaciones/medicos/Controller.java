@@ -16,9 +16,8 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import recetas.Application;
-import recetas.logic.Medico;
 import recetas.logic.Service;
-
+import progra3.logic.Medico;
 
 public class Controller {
     private ViewMedicos view;
