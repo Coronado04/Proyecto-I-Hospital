@@ -1,6 +1,8 @@
 package progra3.logic;
 
-import recetas.data.Database;
+
+import progra3.data.Database;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 

@@ -1,6 +1,7 @@
-package recetas.data;
+package progra3.data;
 
-import recetas.logic.Farmaceuta;
+
+import progra3.logic.Farmaceuta;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

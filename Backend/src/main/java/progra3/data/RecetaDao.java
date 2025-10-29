@@ -1,12 +1,15 @@
-package recetas.data;
+package progra3.data;
 
-import recetas.logic.Medico;
-import recetas.logic.Paciente;
-import recetas.logic.Receta;
 
+import progra3.logic.Paciente;
+import progra3.logic.Receta;
+import progra3.logic.Medico;
+
+import java.sql.Date;
 import java.time.LocalDate;
 import java.sql.PreparedStatement;
 import java.sql.*;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +28,8 @@ public class RecetaDao {
             if (idPaciente != null) stm.setString(2, idPaciente); else stm.setNull(2, Types.VARCHAR);
             LocalDate fc = e.getFechaConfeccion();
             LocalDate fr = e.getFechaRetiro();
-            if (fc != null) stm.setDate(3, java.sql.Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
-            if (fr != null) stm.setDate(4, java.sql.Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
+            if (fc != null) stm.setDate(3, Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
+            if (fr != null) stm.setDate(4, Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
             stm.setString(5, (e.getEstado() != null) ? e.getEstado().name() : null);
 
             int count = stm.executeUpdate();
@@ -59,7 +62,7 @@ public class RecetaDao {
                     Receta r = from(rs);
                     // Cargar líneas asociadas
                     try {
-                        recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                        LineaDao lineaDao = new LineaDao();
                         r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
                     } catch (Exception ex) {
                         // si falla cargar líneas, no abortar la lectura principal; loguear
@@ -89,8 +92,8 @@ public class RecetaDao {
 
             LocalDate fc = r.getFechaConfeccion();
             LocalDate fr = r.getFechaRetiro();
-            if (fc != null) stm.setDate(3, java.sql.Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
-            if (fr != null) stm.setDate(4, java.sql.Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
+            if (fc != null) stm.setDate(3, Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
+            if (fr != null) stm.setDate(4, Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
 
             stm.setString(5, (r.getEstado() != null) ? r.getEstado().name() : null);
             stm.setInt(6, Integer.parseInt(idReceta));
@@ -134,7 +137,7 @@ public class RecetaDao {
                             Receta r = from(rs);
                             // Cargar líneas asociadas para cada receta
                             try {
-                                recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                                LineaDao lineaDao = new LineaDao();
                                 r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
                             } catch (Exception ex) {
                                 ex.printStackTrace();
@@ -150,7 +153,7 @@ public class RecetaDao {
                     while (rs.next()) {
                         Receta r = from(rs);
                         try {
-                            recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                            LineaDao lineaDao = new LineaDao();
                             r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -183,7 +186,7 @@ public class RecetaDao {
                     Receta r = from(rs);
                     // cargar líneas de la receta
                     try {
-                        recetas.data.LineaDao lineaDao = new recetas.data.LineaDao();
+                        LineaDao lineaDao = new LineaDao();
                         r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -208,8 +211,8 @@ public class RecetaDao {
 
         Date d1 = rs.getDate("fechaConfeccion");
         Date d2 = rs.getDate("fechaRetiro");
-        if (d1 != null) r.setFechaConfeccion(((java.sql.Date) d1).toLocalDate());
-        if (d2 != null) r.setFechaRetiro(((java.sql.Date) d2).toLocalDate());
+        if (d1 != null) r.setFechaConfeccion(((Date) d1).toLocalDate());
+        if (d2 != null) r.setFechaRetiro(((Date) d2).toLocalDate());
 
         String est = rs.getString("estado");
         if (est != null) {
@@ -219,7 +222,7 @@ public class RecetaDao {
         }
 
         // Paciente (puede ser nulo)
-        recetas.logic.Paciente p = new recetas.logic.Paciente();
+        Paciente p = new Paciente();
         String pacienteId = null;
         try { pacienteId = rs.getString("paciente"); } catch (Exception ignored) {}
         try { p.setId(pacienteId); } catch (Exception ignored) {}

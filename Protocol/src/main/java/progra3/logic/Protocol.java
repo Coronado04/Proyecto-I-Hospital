@@ -58,6 +58,8 @@ public class Protocol {
     public static final int USUARIO_DELETE = 704;
     public static final int USUARIO_SEARCH = 705;
     public static final int USUARIO_FIND_ALL = 706;
+    public static final int USUARIO_LOGIN = 707;
+    public static final int USUARIO_CAMBIAR_CLAVE = 708;
 
 
     public static final int DISCONNECT = 99;
