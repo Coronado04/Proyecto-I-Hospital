@@ -1,7 +1,7 @@
 package recetas.logic;
 
 
-import progra3.logic.Protocol;
+import progra3.logic.*;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -31,131 +31,173 @@ public class Service {
         }
     }
 
+    private void disconnect() throws Exception {
+        os.writeInt(Protocol.DISCONNECT);
+        os.flush();
+        s.shutdownOutput();
+        s.close();
+    }
+
     public void stop() {
         try {
-            Database.instance().close();
+            disconnect();
         } catch (Exception e) {
-            System.out.println(e);
+            System.exit(-1);
         }
     }
 
     // =============== Medico ===============
     public void create(Medico e) throws Exception {
-        medicoDao.create(e);
+        os.writeInt(Protocol.MEDICO_CREATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("MEDICO DUPLICADO");
     }
 
     public Medico read(Medico e) throws Exception {
-        return medicoDao.read(e.getId());
+        os.writeInt(Protocol.MEDICO_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Medico) is.readObject();
+        else throw new Exception("MEDICO NO EXISTE");
     }
 
     public void update(Medico e) throws Exception {
-        medicoDao.update(e);
+        os.writeInt(Protocol.MEDICO_UPDATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("MEDICO NO EXISTE");
     }
 
-    public List<Medico> findAll() {
-        Medico filtro = new Medico();
-        filtro.setNombre("");
-        return medicoDao.findByNombre(filtro);
+    public List<Medico> findAll() throws Exception {
+        os.writeInt(Protocol.MEDICO_FIND_ALL);
+        os.writeObject(new Medico());
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+            return (List<Medico>) is.readObject();
+        } else throw new Exception("MEDICO NO EXISTE");
     }
 
     public void delete(Medico e) throws Exception {
-        medicoDao.delete(e);
+        os.writeInt(Protocol.MEDICO_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("MEDICO NO EXISTE");
     }
 
     public List<Medico> search(Medico e) {
         try {
-            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
-                List<Medico> resultado = new ArrayList<>();
-                try {
-                    Medico m = medicoDao.read(e.getId().trim());
-                    if (m != null) resultado.add(m);
-                } catch (Exception ex) {
-                }
-                return resultado;
-            } else {
-                return medicoDao.findByNombre(e);
+            os.writeInt(Protocol.MEDICO_SEARCH);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Medico>) is.readObject();
             }
+            else return List.of();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new ArrayList<>();
+            throw new RuntimeException(ex);
         }
     }
 
     // ============= Paciente ============
     public void create(Paciente e) throws Exception {
-        pacienteDao.create(e);
+        os.writeInt(Protocol.PACIENTE_CREATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("PACIENTE DUPLICADO");
     }
 
     public Paciente read(Paciente e) throws Exception {
-        return pacienteDao.read(e.getId());
+        os.writeInt(Protocol.PACIENTE_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Paciente) is.readObject();
+        else throw new Exception("PACIENTE NO EXISTE");
     }
 
     public void update(Paciente e) throws Exception {
-        pacienteDao.update(e);
+        os.writeInt(Protocol.PACIENTE_UPDATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("PACIENTE NO EXISTE");
     }
 
-    public List<Paciente> findAllPaciente() {
-        Paciente filtro = new Paciente();
-        filtro.setNombre("");
-        return pacienteDao.findByNombre(filtro);
-    }
-
+   public List<Paciente> findAllPaciente() {
+       try {
+           os.writeInt(Protocol.PACIENTE_FIND_ALL);
+           os.writeObject(new Paciente());
+           os.flush();
+           if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+               return (List<Paciente>) is.readObject();
+           } else {
+               return new ArrayList<>();
+           }
+       } catch (Exception ex) {
+           ex.printStackTrace();
+           return new ArrayList<>();
+       }
+   }
     public void delete(Paciente e) throws Exception {
-        pacienteDao.delete(e);
+        os.writeInt(Protocol.PACIENTE_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("PACIENTE NO EXISTE");
     }
 
     public List<Paciente> search(Paciente e) {
         try {
-            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
-                List<Paciente> resultado = new ArrayList<>();
-                try {
-                    Paciente p = pacienteDao.read(e.getId().trim());
-                    if (p != null) resultado.add(p);
-                } catch (Exception ex) {
-                }
-                return resultado;
-            } else {
-                return pacienteDao.findByNombre(e);
+            os.writeInt(Protocol.PACIENTE_SEARCH);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Paciente>) is.readObject();
             }
+            else return List.of();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new ArrayList<>();
+            throw new RuntimeException(ex);
         }
     }
 
     // =============== Medicamentos ===============
     public void create(Medicamento e) throws Exception {
-        medicamentoDao.create(e);
+        os.writeInt(Protocol.MEDICAMENTO_CREATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("MEDICAMENTO DUPLICADO");
     }
 
     public Medicamento read(Medicamento e) throws Exception {
-        return medicamentoDao.read(e.getCodigo());
+        os.writeInt(Protocol.MEDICAMENTO_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Producto) is.readObject();
+        else throw new Exception("MEDICAMENTO NO EXISTE");
     }
 
     public void update(Medicamento e) throws Exception {
-        medicamentoDao.update(e);
+        os.writeInt(Protocol.MEDICAMENTO_UPDATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("MEDICAMENTO NO EXISTE");
     }
 
     public List<Medicamento> findAllMedicamentos() {
-        return medicamentoDao.findByNombre(new Medicamento());
-    }
-
-    public void delete(Medicamento e) throws Exception {
-        medicamentoDao.delete(e);
-    }
-
-    public List<Medicamento> search(Medicamento e) {
         try {
-            if (e != null && e.getCodigo() != null && !e.getCodigo().trim().isEmpty()) {
-                List<Medicamento> resultado = new ArrayList<>();
-                try {
-                    Medicamento m = medicamentoDao.read(e.getCodigo().trim());
-                    if (m != null) resultado.add(m);
-                } catch (Exception ex) {
-                }
-                return resultado;
+            os.writeInt(Protocol.MEDICAMENTO_FIND_ALL);
+            os.writeObject(new Medicamento());
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Medicamento>) is.readObject();
             } else {
-                return medicamentoDao.findByNombre(e);
+                return new ArrayList<>();
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -163,39 +205,72 @@ public class Service {
         }
     }
 
+    public void delete(Medicamento e) throws Exception {
+        os.writeInt(Protocol.MEDICAMENTO_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("MEDICAMENTO NO EXISTE");
+    }
+
+    public List<Medicamento> search(Medicamento e) {
+        try {
+            os.writeInt(Protocol.MEDICAMENTO_SEARCH);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Medicamento>) is.readObject();
+            }
+            else return List.of();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     // ============= Farmaceuta ===============
     public void create(Farmaceuta e) throws Exception {
-        farmaceutaDao.create(e);
+        os.writeInt(Protocol.FARMACEUTA_CREATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("FARMACEUTA DUPLICADO");
     }
 
     public Farmaceuta read(Farmaceuta e) throws Exception {
-        return farmaceutaDao.read(e.getId());
+        os.writeInt(Protocol.FARMACEUTA_READ);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Farmaceuta) is.readObject();
+        else throw new Exception("FARMACEUTA NO EXISTE");
     }
 
     public void update(Farmaceuta e) throws Exception {
-        farmaceutaDao.update(e);
+        os.writeInt(Protocol.FARMACEUTA_UPDATE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("FARMACEUTA NO EXISTE");
     }
 
     public void delete(Farmaceuta e) throws Exception {
-        farmaceutaDao.delete(e);
+        os.writeInt(Protocol.FARMACEUTA_DELETE);
+        os.writeObject(e);
+        os.flush();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) {}
+        else throw new Exception("FARMACEUTA NO EXISTE");
     }
 
     public List<Farmaceuta> search(Farmaceuta e) {
         try {
-            if (e != null && e.getId() != null && !e.getId().trim().isEmpty()) {
-                List<Farmaceuta> resultado = new ArrayList<>();
-                try {
-                    Farmaceuta f = farmaceutaDao.read(e.getId().trim());
-                    if (f != null) resultado.add(f);
-                } catch (Exception ex) {
-                }
-                return resultado;
-            } else {
-                return farmaceutaDao.findByNombre(e);
+            os.writeInt(Protocol.FARMACEUTA_SEARCH);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Farmaceuta>) is.readObject();
             }
+            else return List.of();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new ArrayList<>();
+            throw new RuntimeException(ex);
         }
     }
 
