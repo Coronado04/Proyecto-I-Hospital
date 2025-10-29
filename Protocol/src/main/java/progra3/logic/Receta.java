@@ -1,25 +1,22 @@
 package progra3.logic;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Receta {
+public class Receta implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public enum Estado { CONFECCIONADA, PROCESO, LISTA, ENTREGADA }
 
     private String idReceta;
-
     private Medico medico;
-
     private Paciente paciente;
-
     private List<Linea> detalles = new ArrayList<>();
-
     private LocalDate fechaConfeccion;
-
     private LocalDate fechaRetiro;
-
     private Estado estado;
 
     public Receta() {
@@ -67,7 +64,6 @@ public class Receta {
         if (detalles != null) detalles.remove(e);
     }
 
-    // Nuevo setter para que RecetaDao pueda asignar las líneas recuperadas desde BD
     public void setDetalles(List<Linea> detalles) {
         if (detalles == null) {
             this.detalles = new ArrayList<>();
@@ -100,5 +96,4 @@ public class Receta {
     public void setPaciente(Paciente paciente) {
         this.paciente = paciente;
     }
-
 }

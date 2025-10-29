@@ -1,10 +1,11 @@
 package progra3.logic;
 
-
+import java.io.Serializable;
 import java.util.Objects;
 
+public class Medico implements Serializable {
 
-public class Medico {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String clave;
@@ -71,7 +72,5 @@ public class Medico {
     public String toString() {
         return nombre;
     }
-
-
 }
 

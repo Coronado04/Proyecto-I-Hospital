@@ -1,10 +1,11 @@
 package progra3.logic;
 
-
+import java.io.Serializable;
 import java.util.Objects;
 
+public class Farmaceuta implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-public class Farmaceuta {
     private String id;
     private String clave;
     private String nombre;
@@ -60,7 +61,4 @@ public class Farmaceuta {
     public String toString() {
         return nombre;
     }
-
-
-
 }

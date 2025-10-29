@@ -1,8 +1,11 @@
 package progra3.logic;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Linea {
+public class Linea implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int numero; // número de la línea en BD
     private Medicamento medicamento;

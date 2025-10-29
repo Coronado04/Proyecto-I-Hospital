@@ -1,9 +1,6 @@
 package recetas;
 import progra3.logic.Usuario;
 import recetas.logic.Service;
-import java.net.Socket;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import progra3.logic.Protocol;
 
 import recetas.presentaciones.Despacho.ViewDespacho;
@@ -43,33 +40,14 @@ public class Application {
     }
 
     private static void doLogin() {
-        try {
-            // 🔹 Conectarse al servidor (Backend)
-            Socket socket = new Socket(Protocol.SERVER, Protocol.PORT);
-            ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
-
-            // 🔹 Crear modelo y vista
-            Model model = new Model();
-            ViewlogIn view = new ViewlogIn(null);
-
-            // 🔹 Crear controlador e inyectar streams
-            recetas.presentaciones.logIn.Controller controller =
-                    new recetas.presentaciones.logIn.Controller(model, view);
-            controller.setStreams(os, is); // <--- Este método lo agregaste antes
-
-            // 🔹 Mostrar la ventana de login
-            view.setVisible(true);
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                    "Error al conectar con el servidor: " + ex.getMessage(),
-                    "Error de conexión",
-                    JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
+        // Mostrar diálogo de login sin intentar conectar aquí.
+        Model model = new Model();
+        ViewlogIn view = new ViewlogIn(null);
+        recetas.presentaciones.logIn.Controller controller =
+                new recetas.presentaciones.logIn.Controller(model, view);
+        // No intentamos setStreams(os,is) aquí: la conexión se crea en el Controller al presionar "Ingresar".
+        view.setVisible(true);
     }
-
 
     private static void doRun() {
         ventana = new JFrame();
@@ -190,4 +168,3 @@ public class Application {
 
     public static Border BORDER_ERROR = BorderFactory.createMatteBorder(0, 0, 2, 0, Color.RED);
 }
-

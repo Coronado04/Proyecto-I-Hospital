@@ -1,21 +1,19 @@
 package progra3.logic;
 
-
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
+public class Paciente implements Serializable {
 
-public class Paciente {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String nombre;
-
     private LocalDate fechaNacimiento;
-
     private String numero;
 
-
-    public Paciente() {this("", "", null, "");}
+    public Paciente() { this("", "", null, ""); }
 
     public Paciente(String id, String nombre, LocalDate fechaNacimiento, String numero) {
         this.id = id;

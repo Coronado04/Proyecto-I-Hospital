@@ -35,7 +35,8 @@ public class Refresher {
     }
     long c=0;
     private void refresh(){
-        System.out.println(c++);
+        //System.out.println(c++);
+        c++;
         SwingUtilities.invokeLater(
             new Runnable(){
                 public void run(){
