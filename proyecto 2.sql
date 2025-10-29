@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `proyecto2`.`Receta` (
 -- Table `proyecto2`.`Medicamento`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `proyecto2`.`Medicamento` (
-                                                         `codigo` INT NOT NULL,
+                                                         `codigo` VARCHAR(10) NOT NULL,
                                                          `nombre` VARCHAR(45) NULL,
     `presentacion` VARCHAR(45) NULL,
     PRIMARY KEY (`codigo`))
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS Linea (
                                      cantidad INT NULL,
                                      indicaciones VARCHAR(100) NULL,
     duracionDias INT NULL,
-    medicamento INT NOT NULL,
+    medicamento VARCHAR(10) NOT NULL,
     receta INT NOT NULL,
     PRIMARY KEY (numero),
     INDEX fk_Linea_Medicamento1_idx (medicamento ASC) VISIBLE,

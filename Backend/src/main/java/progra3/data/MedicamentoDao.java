@@ -1,6 +1,5 @@
 package progra3.data;
 
-
 import progra3.logic.Medicamento;
 
 import java.sql.PreparedStatement;
@@ -19,13 +18,8 @@ public class MedicamentoDao {
     public void create(Medicamento m) throws Exception {
         String sql = "INSERT INTO Medicamento (codigo, nombre, presentacion) VALUES (?,?,?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            // codigo en BD es INT: validar que el valor sea numérico
-            try {
-                int codigo = Integer.parseInt(m.getCodigo().trim());
-                stm.setInt(1, codigo);
-            } catch (NumberFormatException ex) {
-                throw new Exception("Código de medicamento inválido: debe ser un número entero");
-            }
+            // ahora codigo es VARCHAR, usamos setString directamente
+            stm.setString(1, m.getCodigo() != null ? m.getCodigo().trim() : null);
             stm.setString(2, m.getNombre());
             stm.setString(3, m.getPresentacion());
             int count = stm.executeUpdate();
@@ -38,11 +32,7 @@ public class MedicamentoDao {
     public Medicamento read(String codigo) throws Exception {
         String sql = "SELECT codigo, nombre, presentacion FROM Medicamento WHERE codigo = ?";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            try {
-                stm.setInt(1, Integer.parseInt(codigo.trim()));
-            } catch (NumberFormatException ex) {
-                throw new Exception("Código inválido");
-            }
+            stm.setString(1, codigo != null ? codigo.trim() : null);
             try (ResultSet rs = stm.executeQuery()) {
                 if (rs.next()) {
                     return from(rs);
@@ -58,11 +48,7 @@ public class MedicamentoDao {
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             stm.setString(1, m.getNombre());
             stm.setString(2, m.getPresentacion());
-            try {
-                stm.setInt(3, Integer.parseInt(m.getCodigo().trim()));
-            } catch (NumberFormatException ex) {
-                throw new Exception("Código inválido");
-            }
+            stm.setString(3, m.getCodigo() != null ? m.getCodigo().trim() : null);
             int count = stm.executeUpdate();
             if (count == 0) {
                 throw new Exception("Medicamento no existe");
@@ -73,11 +59,7 @@ public class MedicamentoDao {
     public void delete(Medicamento m) throws Exception {
         String sql = "DELETE FROM Medicamento WHERE codigo=?";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            try {
-                stm.setInt(1, Integer.parseInt(m.getCodigo().trim()));
-            } catch (NumberFormatException ex) {
-                throw new Exception("Código inválido");
-            }
+            stm.setString(1, m.getCodigo() != null ? m.getCodigo().trim() : null);
             int count = stm.executeUpdate();
             if (count == 0) {
                 throw new Exception("Medicamento no existe");
@@ -110,7 +92,7 @@ public class MedicamentoDao {
     public Medicamento from(ResultSet rs) {
         try {
             Medicamento m = new Medicamento();
-            // obtener codigo como string (mysql permite getString sobre columna INT)
+            // obtener codigo como string
             String codigo = rs.getString("codigo");
             m.setCodigo(codigo != null ? codigo : "");
             m.setNombre(rs.getString("nombre"));

@@ -1,7 +1,5 @@
 package progra3.data;
 
-
-
 import progra3.logic.Linea;
 import progra3.logic.Medicamento;
 
@@ -16,11 +14,16 @@ public class LineaDao {
         db = Database.instance();
     }
 
+    /**
+     * Inserta una línea asociada a la receta cuyo idReceta (string con número) se recibe.
+     * Ahora trata medicamento como VARCHAR (codigo String).
+     */
     public void create(Linea l, String idReceta) throws Exception {
         String sql = "INSERT INTO Linea (receta, medicamento, cantidad, indicaciones, duracionDias) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             if (idReceta != null && !idReceta.isEmpty()) {
                 try {
+                    // receta sigue siendo INT en BD (numero), si idReceta es string con número, intentar parseInt
                     stm.setInt(1, Integer.parseInt(idReceta));
                 } catch (NumberFormatException ex) {
                     stm.setNull(1, Types.INTEGER);
@@ -29,7 +32,7 @@ public class LineaDao {
                 stm.setNull(1, Types.INTEGER);
             }
 
-            // medicamento en BD es FK a Medicamento.codigo (en tu SQL es INT); aquí se usa String por compatibilidad con modelo
+            // medicamento ahora es VARCHAR: setString con el codigo
             stm.setString(2, l.getMedicamento() != null ? l.getMedicamento().getCodigo() : null);
             stm.setInt(3, l.getCantidad());
             stm.setString(4, l.getIndicaciones());
@@ -87,11 +90,6 @@ public class LineaDao {
         }
     }
 
-    /**
-     * Devuelve todas las líneas cuyo medicamento coincida con el filtro (por nombre).
-     * Si filtro.getMedicamento().getNombre() está vacío, devuelve todas las líneas.
-     * Además incluye la fecha de la receta (fechaConfeccion) en cada Linea.fechaReceta.
-     */
     public List<Linea> findByNombre(Linea filtro) {
         List<Linea> resultado = new ArrayList<>();
 
@@ -124,9 +122,6 @@ public class LineaDao {
         return resultado;
     }
 
-    /**
-     * Devuelve las líneas asociadas a una receta (por su idReceta: string con número).
-     */
     public List<Linea> findByReceta(String idReceta) {
         List<Linea> resultado = new ArrayList<>();
         if (idReceta == null || idReceta.trim().isEmpty()) return resultado;
@@ -171,7 +166,6 @@ public class LineaDao {
         try { l.setIndicaciones(rs.getString("indicaciones")); } catch (SQLException ignored) {}
         try { l.setDuracionDias(rs.getInt("duracionDias")); } catch (SQLException ignored) {}
 
-        // fecha de la receta (puede ser null)
         try {
             Date d = rs.getDate("rec_fechaConfeccion");
             if (d != null) l.setFechaReceta(d.toLocalDate());
