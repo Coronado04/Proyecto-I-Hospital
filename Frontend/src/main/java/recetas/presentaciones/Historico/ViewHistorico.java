@@ -1,7 +1,8 @@
 package recetas.presentaciones.Historico;
 
-import recetas.logic.Paciente;
-import recetas.logic.Receta;
+
+import progra3.logic.Paciente;
+import progra3.logic.Receta;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

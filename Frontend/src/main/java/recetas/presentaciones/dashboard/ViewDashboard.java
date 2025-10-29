@@ -7,8 +7,9 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
+import progra3.logic.Medicamento;
 import recetas.Application;
-import recetas.logic.Medicamento;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

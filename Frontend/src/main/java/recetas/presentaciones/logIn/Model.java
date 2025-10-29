@@ -1,5 +1,6 @@
 package recetas.presentaciones.logIn;
-import recetas.logic.Usuario;
+
+import progra3.logic.Usuario;
 import recetas.presentaciones.AbstractModel;
 
 public class Model extends AbstractModel {

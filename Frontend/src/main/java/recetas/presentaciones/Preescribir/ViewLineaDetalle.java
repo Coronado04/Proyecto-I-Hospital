@@ -1,8 +1,8 @@
 package recetas.presentaciones.Preescribir;
 
+import progra3.logic.Linea;
+import progra3.logic.Medicamento;
 import recetas.Application;
-import recetas.logic.Linea;
-import recetas.logic.Medicamento;
 
 import javax.swing.*;
 import java.awt.event.*;

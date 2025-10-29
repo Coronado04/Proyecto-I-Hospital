@@ -1,10 +1,10 @@
 package recetas.presentaciones.Preescribir;
 
-import recetas.logic.*;
+import progra3.logic.*;
 
 
 import javax.swing.*;
-import java.beans.PropertyChangeListener;
+
 import java.time.LocalDate;
 import java.util.List;
 

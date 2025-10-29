@@ -1,7 +1,7 @@
 package recetas.presentaciones.medicos;
 
+import progra3.logic.Medico;
 import recetas.Application;
-import recetas.logic.Medico;
 import recetas.presentaciones.AbstractModel;
 
 import java.beans.PropertyChangeListener;

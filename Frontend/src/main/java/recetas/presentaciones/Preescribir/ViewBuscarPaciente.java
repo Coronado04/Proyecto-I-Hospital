@@ -1,6 +1,6 @@
 package recetas.presentaciones.Preescribir;
 
-import recetas.logic.Paciente;
+import progra3.logic.Paciente;
 import recetas.presentaciones.paciente.TableModel;
 
 import javax.swing.*;

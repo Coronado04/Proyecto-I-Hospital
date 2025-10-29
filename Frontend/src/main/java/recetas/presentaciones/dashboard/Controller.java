@@ -1,9 +1,10 @@
 package recetas.presentaciones.dashboard;
 
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import recetas.logic.Medicamento;
-import recetas.logic.Receta;
-import recetas.logic.Linea;
+
+import progra3.logic.Linea;
+import progra3.logic.Medicamento;
+import progra3.logic.Receta;
 import recetas.logic.Service;
 
 import java.awt.*;
@@ -17,7 +18,7 @@ import javax.swing.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
+
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.chart.plot.PiePlot;
 

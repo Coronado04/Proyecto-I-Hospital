@@ -2,7 +2,6 @@ package recetas.presentaciones.Preescribir;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import recetas.Application;
-import recetas.logic.Medicamento;
 
 import javax.swing.*;
 import java.awt.*;

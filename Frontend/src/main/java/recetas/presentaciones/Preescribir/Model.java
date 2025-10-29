@@ -1,5 +1,6 @@
 package recetas.presentaciones.Preescribir;
 
+import progra3.logic.*;
 import recetas.Application;
 import recetas.logic.*;
 import recetas.presentaciones.AbstractModel;

@@ -1,8 +1,7 @@
 package recetas.presentaciones.Historico;
 
+import progra3.logic.Receta;
 import recetas.Application;
-import recetas.logic.Paciente;
-import recetas.logic.Receta;
 import recetas.logic.Service;
 
 public class Controller {

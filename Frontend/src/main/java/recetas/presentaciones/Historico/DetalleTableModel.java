@@ -1,6 +1,7 @@
 package recetas.presentaciones.Historico;
 
-import recetas.logic.Linea;
+
+import progra3.logic.Linea;
 import recetas.presentaciones.AbstractTableModel;
 import java.util.List;
 

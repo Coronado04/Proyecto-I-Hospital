@@ -1,7 +1,8 @@
 package recetas.presentaciones.dashboard;
 
 import org.jfree.data.category.DefaultCategoryDataset;
-import recetas.logic.Medicamento;
+
+import progra3.logic.Medicamento;
 import recetas.presentaciones.AbstractModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;

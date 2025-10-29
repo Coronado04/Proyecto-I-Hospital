@@ -15,8 +15,9 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
+import progra3.logic.Medicamento;
 import recetas.Application;
-import recetas.logic.Medicamento;
+
 import recetas.logic.Service;
 
 public class Controller {

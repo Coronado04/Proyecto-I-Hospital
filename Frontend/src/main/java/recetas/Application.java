@@ -1,7 +1,8 @@
 package recetas;
+import progra3.logic.Sesion;
+import progra3.logic.Usuario;
 import recetas.logic.Service;
-import recetas.logic.Sesion;
-import recetas.logic.Usuario;
+
 import recetas.presentaciones.Despacho.ViewDespacho;
 import recetas.presentaciones.Preescribir.ViewPreescribir;
 import recetas.presentaciones.acercaDe.ViewacercaDe;

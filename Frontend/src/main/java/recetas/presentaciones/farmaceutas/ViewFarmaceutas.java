@@ -1,7 +1,7 @@
 package recetas.presentaciones.farmaceutas;
 
+import progra3.logic.Farmaceuta;
 import recetas.Application;
-import recetas.logic.Farmaceuta;
 
 import javax.swing.*;
 import java.awt.*;

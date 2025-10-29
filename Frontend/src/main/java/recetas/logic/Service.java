@@ -360,11 +360,19 @@ public class Service {
     }
 
     public List<Receta> findAllRecetas() { //************************************
-        Receta filtro = new Receta();
-        Paciente p = new Paciente();
-        p.setNombre("");
-        filtro.setPaciente(p);
-        return recetaDao.findByNombre(filtro);
+        try {
+            os.writeInt(Protocol.RECETA_FIND_ALL);
+            os.writeObject(new Paciente());
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Receta>) is.readObject();
+            } else {
+                return new ArrayList<>();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     public void delete(Receta e) throws Exception {
@@ -424,11 +432,21 @@ public class Service {
         else throw new Exception("USUARIO NO EXISTE");
     }
 
-//    public List<Usuario> findAllUsuarios() {
-//        Usuario filtro = new Usuario();
-//        filtro.setNombre("");
-//        return usuarioDao.findByNombre(filtro);
-//    }
+    public List<Usuario> findAllUsuarios() {
+        try {
+            os.writeInt(Protocol.USUARIO_FIND_ALL);
+            os.writeObject(new Paciente());
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                return (List<Usuario>) is.readObject();
+            } else {
+                return new ArrayList<>();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 
     public void delete(Usuario e) throws Exception {
         os.writeInt(Protocol.USUARIO_DELETE);

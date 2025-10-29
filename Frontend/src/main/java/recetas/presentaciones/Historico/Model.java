@@ -1,8 +1,7 @@
 package recetas.presentaciones.Historico;
 
+import progra3.logic.Receta;
 import recetas.Application;
-import recetas.logic.Medicamento;
-import recetas.logic.Receta;
 import recetas.presentaciones.AbstractModel;
 
 import java.beans.PropertyChangeListener;

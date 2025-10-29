@@ -1,7 +1,8 @@
 package recetas.presentaciones.farmaceutas;
 
+import progra3.logic.Farmaceuta;
 import recetas.Application;
-import recetas.logic.Farmaceuta;
+
 import recetas.presentaciones.AbstractModel;
 
 import java.beans.PropertyChangeListener;

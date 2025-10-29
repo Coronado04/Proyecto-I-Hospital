@@ -1,6 +1,6 @@
 package recetas.presentaciones.paciente;
 
-import recetas.logic.Paciente;
+import progra3.logic.Paciente;
 import recetas.presentaciones.AbstractTableModel;
 
 import java.util.List;

@@ -1,8 +1,9 @@
 package recetas.presentaciones.paciente;
 
 import com.github.lgooddatepicker.components.DatePicker;
+import progra3.logic.Paciente;
 import recetas.Application;
-import recetas.logic.Paciente;
+
 
 import javax.swing.*;
 import java.awt.*;

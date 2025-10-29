@@ -1,7 +1,7 @@
 package recetas.presentaciones.logIn;
 
-import recetas.logic.Sesion;
-import recetas.logic.Usuario;
+import progra3.logic.Sesion;
+import progra3.logic.Usuario;
 
 import javax.swing.*;
 
@@ -33,7 +33,7 @@ public class Controller {
                 throw new Exception("Debe ingresar usuario y contraseña.");
             }
 
-            // 🔹 Verificar credenciales usando la base de datos
+
             Usuario u = Sesion.login(user, pass); // ← este método debe hacer la consulta SQL
 
             model.setUsuario(u);
@@ -44,10 +44,6 @@ public class Controller {
 
             view.dispose();
 
-            // 🔹 Si quieres, aquí puedes abrir la ventana según el rol
-            // if (u.getRol().equalsIgnoreCase("medico")) new ViewMedico(u).setVisible(true);
-            // else if (u.getRol().equalsIgnoreCase("farmaceuta")) new ViewFarmaceuta(u).setVisible(true);
-            // else new ViewAdmin(u).setVisible(true);
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -75,10 +71,9 @@ public class Controller {
             String newPass = JOptionPane.showInputDialog(view, "Ingrese la nueva clave:");
             if (newPass == null || newPass.isEmpty()) return;
 
-            // 🔹 Actualizar la clave en la base de datos
+
             Sesion.actualizarClave(u.getId(), newPass);
 
-            // 🔹 Actualizar la sesión en memoria
             u.setClave(newPass);
             model.setUsuario(u);
             Sesion.setUsuario(u);

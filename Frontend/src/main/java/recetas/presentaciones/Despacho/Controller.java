@@ -1,7 +1,8 @@
 package recetas.presentaciones.Despacho;
 
+import progra3.logic.Receta;
 import recetas.Application;
-import recetas.logic.Receta;
+
 import recetas.logic.Service;
 
 public class Controller {

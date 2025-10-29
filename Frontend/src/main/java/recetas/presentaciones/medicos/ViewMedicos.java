@@ -1,7 +1,6 @@
 package recetas.presentaciones.medicos;
 import recetas.Application;
-import recetas.logic.Medico;
-
+import progra3.logic.Medico;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
