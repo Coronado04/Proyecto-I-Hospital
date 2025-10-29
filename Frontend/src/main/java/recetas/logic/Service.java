@@ -275,11 +275,36 @@ public class Service {
     }
 
     // ============ LINEA ==============
-    public void create(Linea l, String idReceta) throws Exception { //*****************************
+    public void create(Linea l, String idReceta) throws Exception {
+        // Validación mínima (igual que antes)
         if (idReceta == null || idReceta.isEmpty()) {
-            throw new Exception("La Línea debe pertenecer a una receta existente");
+            throw new Exception("La línea debe pertenecer a una receta existente");
         }
-        lineaDao.create(l, idReceta);
+
+        // Se requiere que los streams os/is hayan sido inyectados previamente con setStreams(...)
+        if (os == null || is == null) {
+            throw new Exception("No conectado al servidor (streams no inicializados)");
+        }
+
+        try {
+            // Enviar operación al servidor
+            os.writeInt(Protocol.LINEA_CREATE);
+
+            // Empaquetar los datos: envio un arreglo [Linea, idReceta]
+            Object[] payload = new Object[] { l, idReceta };
+            os.writeObject(payload);
+            os.flush();
+
+            // Leer respuesta del servidor
+            int status = is.readInt();
+            if (status == Protocol.ERROR_NO_ERROR) {
+                // éxito: no se hace nada extra
+            } else {
+                throw new Exception("ERROR AL CREAR LÍNEA");
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     public Linea read(Linea e) throws Exception {
@@ -313,33 +338,21 @@ public class Service {
     }
 
     // =========== RECETAS ==============
-    public void create(Receta e) throws Exception { //***************************************
-        Database db = Database.instance();
-        String idMedico = (e.getMedico() != null) ? e.getMedico().getId() : null;
-        String idPaciente = (e.getPaciente() != null) ? e.getPaciente().getId() : null;
-
+    public void create(Receta e) throws Exception {
+        if (os == null || is == null) {
+            throw new Exception("No conectado al servidor (streams no inicializados)");
+        }
         try {
-            db.setAutoCommit(false);
-            recetaDao.create(e, idMedico, idPaciente);
-            String idRecetaGenerada = e.getIdReceta();
-            if (idRecetaGenerada == null || idRecetaGenerada.trim().isEmpty()) {
-                throw new Exception("No se pudo obtener el nÃºmero de receta generado por la base de datos.");
+            os.writeInt(Protocol.RECETA_CREATE);
+            os.writeObject(e);
+            os.flush();
+            if (is.readInt() == Protocol.ERROR_NO_ERROR) {
+                // éxito, no hay lógica extra
+            } else {
+                throw new Exception("RECETA DUPLICADA");
             }
-            if (e.getDetalles() != null) {
-                for (Linea linea : e.getDetalles()) {
-                    lineaDao.create(linea, idRecetaGenerada);
-                }
-            }
-            db.commit();
         } catch (Exception ex) {
-            db.rollback();
             throw ex;
-        } finally {
-            try {
-                db.setAutoCommit(true);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
