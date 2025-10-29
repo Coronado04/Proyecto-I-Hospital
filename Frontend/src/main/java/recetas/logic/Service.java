@@ -177,7 +177,7 @@ public class Service {
         os.writeInt(Protocol.MEDICAMENTO_READ);
         os.writeObject(e);
         os.flush();
-        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Producto) is.readObject();
+        if (is.readInt() == Protocol.ERROR_NO_ERROR) return (Medicamento) is.readObject();
         else throw new Exception("MEDICAMENTO NO EXISTE");
     }
 
@@ -275,7 +275,7 @@ public class Service {
     }
 
     // ============ LINEA ==============
-    public void create(Linea l, String idReceta) throws Exception {
+    public void create(Linea l, String idReceta) throws Exception { //*****************************
         if (idReceta == null || idReceta.isEmpty()) {
             throw new Exception("La Línea debe pertenecer a una receta existente");
         }
@@ -313,7 +313,7 @@ public class Service {
     }
 
     // =========== RECETAS ==============
-    public void create(Receta e) throws Exception {
+    public void create(Receta e) throws Exception { //***************************************
         Database db = Database.instance();
         String idMedico = (e.getMedico() != null) ? e.getMedico().getId() : null;
         String idPaciente = (e.getPaciente() != null) ? e.getPaciente().getId() : null;
@@ -359,7 +359,7 @@ public class Service {
         else throw new Exception("RECETA NO EXISTE");
     }
 
-    public List<Receta> findAllRecetas() {
+    public List<Receta> findAllRecetas() { //************************************
         Receta filtro = new Receta();
         Paciente p = new Paciente();
         p.setNombre("");
