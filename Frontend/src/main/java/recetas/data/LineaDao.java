@@ -1,4 +1,4 @@
-package progra3.pos.data;
+package recetas.data;
 
 import recetas.logic.Linea;
 import recetas.logic.Medicamento;

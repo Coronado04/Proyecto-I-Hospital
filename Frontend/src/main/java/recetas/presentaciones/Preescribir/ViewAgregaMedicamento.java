@@ -125,9 +125,9 @@ public class ViewAgregaMedicamento extends JDialog implements PropertyChangeList
 
     private void actualizarLista() {
         int[] cols = {
-                recetas.presentaciones.medicamentos.TableModel.CODIGO,
-                recetas.presentaciones.medicamentos.TableModel.NOMBRE,
-                recetas.presentaciones.medicamentos.TableModel.PRESENTACION,
+                TableModel.CODIGO,
+                TableModel.NOMBRE,
+                TableModel.PRESENTACION,
 
         };
         List<Medicamento> medicamentos= model.getMedicamentos();

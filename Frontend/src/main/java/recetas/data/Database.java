@@ -1,4 +1,4 @@
-package progra3.pos.data;
+package recetas.data;
 
 import java.io.BufferedInputStream;
 import java.io.File;
