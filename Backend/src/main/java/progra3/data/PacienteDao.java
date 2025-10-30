@@ -80,13 +80,20 @@ public class PacienteDao {
 
     public List<Paciente> findByNombre(Paciente filtro) {
         List<Paciente> resultado = new ArrayList<>();
-        String sql = "SELECT p.id, p.nombre, p.fechaNacimiento, p.telefono FROM Paciente p WHERE p.nombre LIKE ? ORDER BY p.nombre";
+        String sql = "SELECT p.id, p.nombre, p.fechaNacimiento, p.telefono FROM Paciente p WHERE (p.id LIKE ? OR p.nombre LIKE ?) ORDER BY p.nombre";
         String nombreFiltro = "";
-        if (filtro != null && filtro.getNombre() != null) {
-            nombreFiltro = filtro.getNombre().trim();
+        String idFiltro = "";
+        if (filtro != null) {
+            if (filtro.getNombre() != null) {
+                nombreFiltro = filtro.getNombre().trim();
+            }
+            if (filtro.getId() != null) {
+                idFiltro = filtro.getId().trim();
+            }
         }
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, "%" + nombreFiltro + "%");
+            stm.setString(1, "%" + idFiltro + "%");
+            stm.setString(2, "%" + nombreFiltro + "%");
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     Paciente p = from(rs);

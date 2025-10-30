@@ -67,17 +67,27 @@ public class MedicoDao {
         }
     }
 
-    public List<Medico> findByNombre(Medico filtro){
-        List<Medico> resultado= new ArrayList<Medico>();
-        String sql = "SELECT id, nombre, especialidad, clave FROM Medico WHERE nombre LIKE ? ORDER BY nombre";
+   public List<Medico> findByNombre(Medico filtro){
+        List<Medico> resultado = new ArrayList<Medico>();
+        boolean searchById = filtro != null && filtro.getId() != null && !filtro.getId().trim().isEmpty();
+        String sql;
+        if (searchById) {
+            sql = "SELECT id, nombre, especialidad, clave FROM Medico WHERE id = ? ORDER BY nombre";
+        } else {
+            sql = "SELECT id, nombre, especialidad, clave FROM Medico WHERE nombre LIKE ? ORDER BY nombre";
+        }
         String nombreFiltro = "";
         if (filtro != null && filtro.getNombre() != null) {
             nombreFiltro = filtro.getNombre().trim();
         }
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, "%" + nombreFiltro + "%");
+            if (searchById) {
+                stm.setString(1, filtro.getId().trim());
+            } else {
+                stm.setString(1, "%" + nombreFiltro + "%");
+            }
             try (ResultSet rs = stm.executeQuery()) {
-                while(rs.next()){
+                while (rs.next()) {
                     resultado.add(from(rs));
                 }
             }

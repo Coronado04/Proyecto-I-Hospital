@@ -67,12 +67,23 @@ public class FarmaceutaDao {
         }
     }
 
-    public List<Farmaceuta> findByNombre(Farmaceuta filtro) {
+   public List<Farmaceuta> findByNombre(Farmaceuta filtro) {
         List<Farmaceuta> resultado = new ArrayList<>();
         String nombreFiltro = (filtro != null && filtro.getNombre() != null) ? filtro.getNombre().trim() : "";
-        String sql = "SELECT id, nombre, clave FROM Farmaceuta WHERE nombre LIKE ? ORDER BY nombre";
+        String idFiltro = (filtro != null && filtro.getId() != null) ? filtro.getId().trim() : "";
+        String sql;
+        boolean searchById = !idFiltro.isEmpty();
+        if (searchById) {
+            sql = "SELECT id, nombre, clave FROM Farmaceuta WHERE id = ? ORDER BY nombre";
+        } else {
+            sql = "SELECT id, nombre, clave FROM Farmaceuta WHERE nombre LIKE ? ORDER BY nombre";
+        }
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, "%" + nombreFiltro + "%");
+            if (searchById) {
+                stm.setString(1, idFiltro);
+            } else {
+                stm.setString(1, "%" + nombreFiltro + "%");
+            }
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     resultado.add(from(rs));

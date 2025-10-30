@@ -67,6 +67,4 @@ public class Model extends AbstractModel {
     public void setFilter(Medico filter) {
         this.filter = filter;
     }
-
-
 }
