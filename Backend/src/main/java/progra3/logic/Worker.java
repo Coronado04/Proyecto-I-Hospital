@@ -1,4 +1,3 @@
-// Reemplaza Worker.java del backend por este contenido (modificado ASYNC handling)
 package progra3.logic;
 
 import java.io.EOFException;
@@ -599,18 +598,33 @@ public class Worker implements Runnable {
                                 String origen = (String) is.readObject();
                                 String destino = (String) is.readObject();
                                 String texto = (String) is.readObject();
-                                for (Worker w : srv.workers) {
-                                    if (w != this && w.is != null) {
-                                        // Enviar solo al destinatario exacto
-                                        w.os.writeInt(Protocol.DELIVER_MENSAJE);
-                                        w.os.writeObject(origen);
-                                        w.os.writeObject(texto);
-                                        w.os.flush();
+
+                                // Enviar SOLO al destinatario exacto (no al resto)
+                                boolean delivered = false;
+                                synchronized (srv.workers) {
+                                    for (Worker w : srv.workers) {
+                                        if (w != null && w != this && w.isAsync() && w.usuarioId != null && w.usuarioId.equals(destino)) {
+                                            try {
+                                                w.os.writeInt(Protocol.DELIVER_MENSAJE);
+                                                w.os.writeObject(origen);
+                                                w.os.writeObject(texto);
+                                                w.os.flush();
+                                                delivered = true;
+                                                break; // un solo receptor esperado
+                                            } catch (IOException ioe) {
+                                                System.err.println("Error enviando mensaje a " + destino + ": " + ioe.getMessage());
+                                            }
+                                        }
                                     }
                                 }
 
+                                // Responder al emisor con estado (si quieres notificar envío correcto)
                                 os.writeInt(Protocol.ERROR_NO_ERROR);
                                 os.flush();
+
+                                if (!delivered) {
+                                    System.out.println("Mensaje destinado a '" + destino + "' no entregado (usuario no conectado).");
+                                }
 
                             } catch (Exception ex) {
                                 ex.printStackTrace();
@@ -629,7 +643,6 @@ public class Worker implements Runnable {
                                 System.out.println("Listener asíncrono conectado: " + usuarioId);
 
                                 // Enviar al listener recién conectado la lista de usuarios ya logueados
-                                // Esto asegura que ventanas abiertas después se sincronicen con el estado actual
                                 synchronized (srv.workers) {
                                     for (Worker w : srv.workers) {
                                         if (w != null && w.usuarioId != null) {

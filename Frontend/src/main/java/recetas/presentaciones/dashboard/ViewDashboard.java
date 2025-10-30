@@ -188,8 +188,18 @@ public class ViewDashboard implements PropertyChangeListener {
             hastaLbl.setToolTipText("Fecha menor a la inicial");
 
             list.setModel(model.getTableModel());
-            JFreeChart chart = ChartFactory.createLineChart("Ventas por mes","Mes","Ventas",
-                    new DefaultCategoryDataset(), PlotOrientation.VERTICAL,true,true,false);
+
+            // Mostrar un gráfico vacío pero conservar el título real "Medicamentos"
+            JFreeChart chart = ChartFactory.createLineChart(
+                    "Medicamentos",   // mantengo el título "Medicamentos"
+                    "Mes",            // etiqueta eje X
+                    "Cantidad",       // etiqueta eje Y
+                    new DefaultCategoryDataset(), // dataset vacío
+                    PlotOrientation.VERTICAL,
+                    true,
+                    true,
+                    false
+            );
             ChartPanel chartPanel = new ChartPanel(chart);
             graficoMedicamentos.removeAll();
             graficoMedicamentos.setLayout(new BorderLayout());

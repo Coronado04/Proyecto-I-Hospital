@@ -1,4 +1,3 @@
-// Reemplaza el controlador de usuarios del frontend por este (evita duplicados al agregar usuarios)
 package recetas.presentaciones.usuarios;
 
 import progra3.logic.Usuario;
@@ -8,11 +7,23 @@ import recetas.presentaciones.UsuariosThreadListener;
 
 import javax.swing.*;
 import java.io.ObjectOutputStream;
+import java.util.*;
 
+/**
+ * Controller actualizado para:
+ * - recibir notificaciones de mensajes como "pendientes"
+ * - marcar visualmente remitentes con mensajes pendientes
+ * - permitir al usuario seleccionar el remitente y pulsar "Recibir" para ver el contenido
+ */
 public class Controller implements UsuariosThreadListener {
     private ViewUsuarios view;
     private Model model;
     private SocketListener socketListener;
+
+    // Mensajes pendientes por remitente (origenId -> lista de mensajes)
+    private final Map<String, List<String>> pendingMessages = new HashMap<>();
+    // Conjunto de remitentes que tienen mensajes pendientes (para marcar UI)
+    private final Set<String> pendingIds = new HashSet<>();
 
     public Controller(ViewUsuarios view, Model model) {
         model.init();
@@ -20,6 +31,9 @@ public class Controller implements UsuariosThreadListener {
         this.model = model;
         view.setController(this);
         view.setModel(model);
+
+        // Inyectar la referencia de pendingIds en la vista para que pueda renderizar filas marcadas
+        view.setPendingIdsSupplier(() -> Collections.unmodifiableSet(pendingIds));
 
         try {
             // Service.instance().getSid() debe existir (ver Service más abajo)
@@ -53,13 +67,31 @@ public class Controller implements UsuariosThreadListener {
         model.getList().removeIf(u -> u.getId() != null && u.getId().equals(idUsuario));
         // Notificar cambio
         model.setList(model.getList());
+
+        // limpiar mensajes pendientes de ese usuario (si corresponde)
+        pendingMessages.remove(idUsuario);
+        pendingIds.remove(idUsuario);
+        view.repaintTable();
     }
 
     @Override
     public void deliver_Mensaje(String origen, String mensaje) {
-        JOptionPane.showMessageDialog(view.getPanelExterno(),
-                "Mensaje de " + origen + ":\n" + mensaje,
-                "Nuevo mensaje", JOptionPane.INFORMATION_MESSAGE);
+        // <-- ya estamos en EDT porque SocketListener usa SwingUtilities.invokeLater
+        // Guardar mensaje pendiente
+        pendingMessages.computeIfAbsent(origen, k -> new ArrayList<>()).add(mensaje);
+        pendingIds.add(origen);
+
+        // Asegurarnos de que el remitente figura en la lista de usuarios (si no, añadirlo)
+        boolean existe = model.getList().stream().anyMatch(u -> u.getId() != null && u.getId().equals(origen));
+        if (!existe) {
+            Usuario u = new Usuario();
+            u.setId(origen);
+            model.agregarUsuario(u);
+        }
+
+        // Notificar a la vista para que marque la fila correspondiente
+        view.setPendingIdsSupplier(() -> Collections.unmodifiableSet(pendingIds));
+        view.repaintTable();
     }
 
     // ---- Métodos para botones (NO @Override) ----
@@ -79,11 +111,36 @@ public class Controller implements UsuariosThreadListener {
             os.writeObject(mensaje);
             os.flush();
         }
+
+        // No mostrar notificación local al remitente (el receptor verá la notificación)
     }
 
     public void recibir(int row) throws Exception {
+        if (row < 0 || row >= model.getList().size()) {
+            throw new Exception("Debe seleccionar un usuario.");
+        }
+        Usuario u = model.getList().get(row);
+        String id = u.getId();
+        List<String> mensajes = pendingMessages.remove(id);
+        if (mensajes == null || mensajes.isEmpty()) {
+            JOptionPane.showMessageDialog(view.getPanelExterno(),
+                    "No hay mensajes pendientes de " + id,
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Mostrar todos los mensajes pendientes en un solo diálogo (puedes adaptar formato)
+        StringBuilder sb = new StringBuilder();
+        for (String m : mensajes) {
+            sb.append(m).append("\n\n");
+        }
         JOptionPane.showMessageDialog(view.getPanelExterno(),
-                "Este botón puede servir para futuras funciones (historial, etc).",
-                "Recibir", JOptionPane.INFORMATION_MESSAGE);
+                "Mensaje(es) de " + id + ":\n\n" + sb.toString(),
+                "Mensajes recibidos", JOptionPane.INFORMATION_MESSAGE);
+
+        // quitar la marca visual y refrescar la vista
+        pendingIds.remove(id);
+        view.setPendingIdsSupplier(() -> Collections.unmodifiableSet(pendingIds));
+        view.repaintTable();
     }
 }
