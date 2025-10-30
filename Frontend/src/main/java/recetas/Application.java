@@ -60,9 +60,9 @@ public class Application {
 
         ventana = new JFrame();
         JTabbedPane tabbedPane = new JTabbedPane();
-        ventana.add(tabbedPane, BorderLayout.CENTER);
-        ventana.add(usuarios,BorderLayout.EAST);
 
+        // --- crear las pestañas normalmente ---
+        ventana.add(tabbedPane, BorderLayout.CENTER);
         ventana.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -162,10 +162,28 @@ public class Application {
         System.out.println("Usuario logueado: " + actual);
 
 
-        ventana.setSize(1200, 600);
+        ventana.setSize(1300, 600);
         ventana.setResizable(false);
         ventana.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ventana.setTitle("RECETAS");
+
+        // --- Solución recomendada: colocar el tabbedPane y el panel 'usuarios' en un JSplitPane ---
+        // Fijar ancho preferido del panel derecho (usuarios)
+        usuarios.setPreferredSize(new Dimension(260, ventana.getHeight()));
+
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabbedPane, usuarios);
+        split.setOneTouchExpandable(true);
+        split.setContinuousLayout(true);
+        split.setResizeWeight(1.0); // dejar que el panel izquierdo tome el espacio extra
+
+        // Colocar el split en el centro del frame
+        ventana.getContentPane().removeAll();
+        ventana.getContentPane().setLayout(new BorderLayout());
+        ventana.getContentPane().add(split, BorderLayout.CENTER);
+
+        // Ajustar posición del divisor para que el panel de usuarios quede en aprox 260px
+        split.setDividerLocation(ventana.getWidth() - 260);
+
         ventana.setVisible(true);
     }
 

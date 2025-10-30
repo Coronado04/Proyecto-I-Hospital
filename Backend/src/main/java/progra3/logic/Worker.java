@@ -1,3 +1,4 @@
+// Reemplaza Worker.java del backend por este contenido (modificado ASYNC handling)
 package progra3.logic;
 
 import java.io.EOFException;
@@ -626,6 +627,23 @@ public class Worker implements Runnable {
                                 os.writeInt(Protocol.ERROR_NO_ERROR);
                                 os.flush();
                                 System.out.println("Listener asíncrono conectado: " + usuarioId);
+
+                                // Enviar al listener recién conectado la lista de usuarios ya logueados
+                                // Esto asegura que ventanas abiertas después se sincronicen con el estado actual
+                                synchronized (srv.workers) {
+                                    for (Worker w : srv.workers) {
+                                        if (w != null && w.usuarioId != null) {
+                                            try {
+                                                os.writeInt(Protocol.DELIVER_LOGIN);
+                                                os.writeObject(w.usuarioId);
+                                                os.flush();
+                                            } catch (IOException ioe) {
+                                                // ignore: si falla escribir a este listener, no podemos hacer más
+                                            }
+                                        }
+                                    }
+                                }
+
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                                 safeWriteErrorAndFlush();

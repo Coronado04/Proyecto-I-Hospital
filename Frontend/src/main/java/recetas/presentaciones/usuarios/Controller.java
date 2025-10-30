@@ -1,3 +1,4 @@
+// Reemplaza el controlador de usuarios del frontend por este (evita duplicados al agregar usuarios)
 package recetas.presentaciones.usuarios;
 
 import progra3.logic.Usuario;
@@ -37,16 +38,21 @@ public class Controller implements UsuariosThreadListener {
 
     @Override
     public void deliver_Login(String idUsuario) {
-        Usuario u = new Usuario();
-        u.setId(idUsuario);
-        model.agregarUsuario(u);
+        // Evitar duplicados: si ya existe usuario con ese id, no lo agregamos
+        boolean existe = model.getList().stream().anyMatch(u -> u.getId() != null && u.getId().equals(idUsuario));
+        if (!existe) {
+            Usuario u = new Usuario();
+            u.setId(idUsuario);
+            model.agregarUsuario(u);
+        }
     }
 
     @Override
     public void deliver_Logout(String idUsuario) {
-        Usuario u = new Usuario();
-        u.setId(idUsuario);
-        model.quitarUsuario(u);
+        // Eliminar usuario de la lista si existe
+        model.getList().removeIf(u -> u.getId() != null && u.getId().equals(idUsuario));
+        // Notificar cambio
+        model.setList(model.getList());
     }
 
     @Override
@@ -81,5 +87,3 @@ public class Controller implements UsuariosThreadListener {
                 "Recibir", JOptionPane.INFORMATION_MESSAGE);
     }
 }
-
-
