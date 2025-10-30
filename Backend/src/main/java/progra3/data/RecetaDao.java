@@ -1,6 +1,5 @@
 package progra3.data;
 
-
 import progra3.logic.Paciente;
 import progra3.logic.Receta;
 import progra3.logic.Medico;
@@ -24,27 +23,27 @@ public class RecetaDao {
         String sql = "INSERT INTO Receta (medico, paciente, fechaConfeccion, fechaRetiro, estado) " +
                 "VALUES (?,?,?,?,?)";
         try (PreparedStatement stm = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            if (idMedico != null) stm.setString(1, idMedico); else stm.setNull(1, Types.VARCHAR);
-            if (idPaciente != null) stm.setString(2, idPaciente); else stm.setNull(2, Types.VARCHAR);
+            if (idMedico != null && !idMedico.isEmpty()) stm.setString(1, idMedico); else stm.setNull(1, Types.VARCHAR);
+            if (idPaciente != null && !idPaciente.isEmpty()) stm.setString(2, idPaciente); else stm.setNull(2, Types.VARCHAR);
             LocalDate fc = e.getFechaConfeccion();
             LocalDate fr = e.getFechaRetiro();
             if (fc != null) stm.setDate(3, Date.valueOf(fc)); else stm.setNull(3, Types.DATE);
             if (fr != null) stm.setDate(4, Date.valueOf(fr)); else stm.setNull(4, Types.DATE);
+
             stm.setString(5, (e.getEstado() != null) ? e.getEstado().name() : null);
 
-            int count = stm.executeUpdate();
-            if (count == 0) {
+            int affected = stm.executeUpdate();
+            if (affected == 0) {
                 throw new Exception("Error al crear la receta");
             }
 
-            // Obtener la clave generada (numero)
-            try (ResultSet keys = stm.getGeneratedKeys()) {
-                if (keys != null && keys.next()) {
-                    int generated = keys.getInt(1);
-                    e.setIdReceta(String.valueOf(generated));
+            try (ResultSet gk = stm.getGeneratedKeys()) {
+                if (gk != null && gk.next()) {
+                    int numero = gk.getInt(1);
+                    e.setIdReceta(String.valueOf(numero));
+                } else {
+                    throw new Exception("No se obtuvo la clave generada para la receta");
                 }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
             }
         }
     }
@@ -60,12 +59,10 @@ public class RecetaDao {
             try (ResultSet rs = stm.executeQuery()) {
                 if (rs.next()) {
                     Receta r = from(rs);
-                    // Cargar líneas asociadas
                     try {
                         LineaDao lineaDao = new LineaDao();
                         r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
                     } catch (Exception ex) {
-                        // si falla cargar líneas, no abortar la lectura principal; loguear
                         ex.printStackTrace();
                     }
                     return r;
@@ -116,86 +113,80 @@ public class RecetaDao {
         }
     }
 
+    /**
+     * findByNombre ahora soporta:
+     * - filtro.getPaciente().getId()  -> búsqueda exacta por paciente id (r.paciente = ?)
+     * - filtro.getPaciente().getNombre() -> búsqueda por nombre (LIKE)
+     * - si no hay paciente en el filtro, devuelve todas las recetas
+     */
     public List<Receta> findByNombre(Receta filtro) {
         List<Receta> resultado = new ArrayList<>();
         try {
-            String sql = "SELECT r.*, me.nombre AS me_nombre, pa.nombre AS pa_nombre " +
+            // SQL base con joins
+            String sqlBase = "SELECT r.*, me.nombre AS me_nombre, pa.nombre AS pa_nombre " +
                     "FROM Receta r " +
                     "LEFT JOIN Medico me ON r.medico = me.id " +
                     "LEFT JOIN Paciente pa ON r.paciente = pa.id";
 
-            boolean usarFiltro = (filtro != null && filtro.getPaciente() != null
-                    && filtro.getPaciente().getNombre() != null
-                    && !filtro.getPaciente().getNombre().trim().isEmpty());
+            // Caso 1: búsqueda por patient id exacto
+            if (filtro != null && filtro.getPaciente() != null) {
+                String pacienteId = filtro.getPaciente().getId();
+                String pacienteNombre = filtro.getPaciente().getNombre();
 
-            if (usarFiltro) {
-                sql += " WHERE pa.nombre LIKE ? ORDER BY r.fechaConfeccion DESC";
-                try (PreparedStatement stm = db.prepareStatement(sql)) {
-                    stm.setString(1, "%" + filtro.getPaciente().getNombre().trim() + "%");
-                    try (ResultSet rs = stm.executeQuery()) {
-                        while (rs.next()) {
-                            Receta r = from(rs);
-                            // Cargar líneas asociadas para cada receta
-                            try {
-                                LineaDao lineaDao = new LineaDao();
-                                r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
+                if (pacienteId != null && !pacienteId.trim().isEmpty()) {
+                    String sql = sqlBase + " WHERE r.paciente = ? ORDER BY r.fechaConfeccion DESC";
+                    try (PreparedStatement stm = db.prepareStatement(sql)) {
+                        stm.setString(1, pacienteId.trim());
+                        try (ResultSet rs = stm.executeQuery()) {
+                            while (rs.next()) {
+                                Receta r = from(rs);
+                                try {
+                                    LineaDao lineaDao = new LineaDao();
+                                    r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                                } catch (Exception ex) { ex.printStackTrace(); }
+                                resultado.add(r);
                             }
-                            resultado.add(r);
                         }
                     }
+                    return resultado;
                 }
-            } else {
-                sql += " ORDER BY r.fechaConfeccion DESC";
-                try (PreparedStatement stm = db.prepareStatement(sql);
-                     ResultSet rs = stm.executeQuery()) {
-                    while (rs.next()) {
-                        Receta r = from(rs);
-                        try {
-                            LineaDao lineaDao = new LineaDao();
-                            r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
+
+                // Caso 2: búsqueda por nombre de paciente
+                if (pacienteNombre != null && !pacienteNombre.trim().isEmpty()) {
+                    String sql = sqlBase + " WHERE pa.nombre LIKE ? ORDER BY r.fechaConfeccion DESC";
+                    try (PreparedStatement stm = db.prepareStatement(sql)) {
+                        stm.setString(1, "%" + pacienteNombre.trim() + "%");
+                        try (ResultSet rs = stm.executeQuery()) {
+                            while (rs.next()) {
+                                Receta r = from(rs);
+                                try {
+                                    LineaDao lineaDao = new LineaDao();
+                                    r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
+                                } catch (Exception ex) { ex.printStackTrace(); }
+                                resultado.add(r);
+                            }
                         }
-                        resultado.add(r);
                     }
+                    return resultado;
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return resultado;
-    }
 
-    /**
-     * Nuevo: busca todas las recetas asociadas a un paciente (por id de paciente).
-     */
-    public List<Receta> findByPaciente(String pacienteId) {
-        List<Receta> resultado = new ArrayList<>();
-        String sql = "SELECT r.*, me.nombre AS me_nombre, pa.nombre AS pa_nombre " +
-                "FROM Receta r " +
-                "LEFT JOIN Medico me ON r.medico = me.id " +
-                "LEFT JOIN Paciente pa ON r.paciente = pa.id " +
-                "WHERE r.paciente = ? " +
-                "ORDER BY r.fechaConfeccion DESC";
-        try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, pacienteId);
-            try (ResultSet rs = stm.executeQuery()) {
+            // Caso 3: no hay filtro de paciente -> devolver todas las recetas
+            String sql = sqlBase + " ORDER BY r.fechaConfeccion DESC";
+            try (PreparedStatement stm = db.prepareStatement(sql);
+                 ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     Receta r = from(rs);
-                    // cargar líneas de la receta
                     try {
                         LineaDao lineaDao = new LineaDao();
                         r.setDetalles(lineaDao.findByReceta(r.getIdReceta()));
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    } catch (Exception ex) { ex.printStackTrace(); }
                     resultado.add(r);
                 }
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return resultado;
     }
@@ -203,16 +194,14 @@ public class RecetaDao {
     private Receta from(ResultSet rs) throws SQLException {
         Receta r = new Receta();
 
-        // mapa numero auto_increment al id del modelo
-        try {
-            int numero = rs.getInt("numero");
-            r.setIdReceta(String.valueOf(numero));
-        } catch (Exception ignored) {}
+        // numero -> idReceta string en modelo
+        int numero = rs.getInt("numero");
+        r.setIdReceta(String.valueOf(numero));
 
         Date d1 = rs.getDate("fechaConfeccion");
         Date d2 = rs.getDate("fechaRetiro");
-        if (d1 != null) r.setFechaConfeccion(((Date) d1).toLocalDate());
-        if (d2 != null) r.setFechaRetiro(((Date) d2).toLocalDate());
+        if (d1 != null) r.setFechaConfeccion(((java.sql.Date) d1).toLocalDate());
+        if (d2 != null) r.setFechaRetiro(((java.sql.Date) d2).toLocalDate());
 
         String est = rs.getString("estado");
         if (est != null) {
@@ -221,19 +210,13 @@ public class RecetaDao {
             } catch (IllegalArgumentException ignored) {}
         }
 
-        // Paciente (puede ser nulo)
         Paciente p = new Paciente();
-        String pacienteId = null;
-        try { pacienteId = rs.getString("paciente"); } catch (Exception ignored) {}
-        try { p.setId(pacienteId); } catch (Exception ignored) {}
+        try { p.setId(rs.getString("paciente")); } catch (Exception ignored) {}
         try { p.setNombre(rs.getString("pa_nombre")); } catch (Exception ignored) {}
         if (p.getId() != null || p.getNombre() != null) r.setPaciente(p);
 
-        // Medico (puede ser nulo)
         Medico m = new Medico();
-        String medicoId = null;
-        try { medicoId = rs.getString("medico"); } catch (Exception ignored) {}
-        try { m.setId(medicoId); } catch (Exception ignored) {}
+        try { m.setId(rs.getString("medico")); } catch (Exception ignored) {}
         try { m.setNombre(rs.getString("me_nombre")); } catch (Exception ignored) {}
         if (m.getId() != null || m.getNombre() != null) r.setMedico(m);
 
