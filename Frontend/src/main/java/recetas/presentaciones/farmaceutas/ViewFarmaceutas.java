@@ -171,7 +171,7 @@ public class ViewFarmaceutas implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case Model.LIST:
-                int[] cols = {TableModel.ID, TableModel.NOMBRE, TableModel.ESPECIALIDAD};
+                int[] cols = {TableModel.ID, TableModel.NOMBRE};
                 table1.setModel(new TableModel(cols,model.getListaFarmaceutas()));
                 break;
             case Model.CURRENT:

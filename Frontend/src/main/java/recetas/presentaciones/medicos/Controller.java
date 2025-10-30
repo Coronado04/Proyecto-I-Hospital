@@ -1,6 +1,4 @@
 package recetas.presentaciones.medicos;
-
-
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
@@ -132,7 +130,5 @@ public class Controller implements ThreadListener {
     public void stop(){
         refresher.stop();
     }
-
-
 
 }

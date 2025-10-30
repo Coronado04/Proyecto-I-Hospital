@@ -134,7 +134,6 @@ public class LineaDao {
                 "LEFT JOIN Receta r ON l.receta = r.numero " +
                 "WHERE l.receta = ? " +
                 "ORDER BY l.numero";
-
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             try {
                 stm.setInt(1, Integer.parseInt(idReceta));
