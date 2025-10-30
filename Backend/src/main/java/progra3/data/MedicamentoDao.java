@@ -67,22 +67,15 @@ public class MedicamentoDao {
         }
     }
 
-   public List<Medicamento> findByNombre(Medicamento filtro) {
+    public List<Medicamento> findByNombre(Medicamento filtro) {
         List<Medicamento> resultado = new ArrayList<>();
         String nombreFiltro = "";
-        String codigoFiltro = "";
-        if (filtro != null) {
-            if (filtro.getNombre() != null) {
-                nombreFiltro = filtro.getNombre().trim();
-            }
-            if (filtro.getCodigo() != null) {
-                codigoFiltro = filtro.getCodigo().trim();
-            }
+        if (filtro != null && filtro.getNombre() != null) {
+            nombreFiltro = filtro.getNombre().trim();
         }
-        String sql = "SELECT codigo, nombre, presentacion FROM Medicamento WHERE nombre LIKE ? OR codigo LIKE ? ORDER BY nombre";
+        String sql = "SELECT codigo, nombre, presentacion FROM Medicamento WHERE nombre LIKE ? ORDER BY nombre";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             stm.setString(1, "%" + nombreFiltro + "%");
-            stm.setString(2, "%" + codigoFiltro + "%");
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     Medicamento m = from(rs);
