@@ -22,6 +22,9 @@ import recetas.logic.Service;
 import recetas.presentaciones.Refresher;
 import recetas.presentaciones.ThreadListener;
 
+import javax.swing.*;
+import java.util.List;
+
 public class Controller implements ThreadListener {
     private ViewMedicamentos view;
     private Model model;
@@ -57,6 +60,11 @@ public class Controller implements ThreadListener {
         }
         model.setFilter(new Medicamento());
         search(model.getFilter());
+
+        // Notificar listeners locales (dashboard u otras vistas) para actualizar inmediatamente
+        try {
+            Service.instance().notifyMedicamentoListeners();
+        } catch (Exception ignore) {}
     }
 
     public void edit(int row){
@@ -69,7 +77,13 @@ public class Controller implements ThreadListener {
 
     public void delete()throws Exception{
         Service.instance().delete(model.getCurrent());
+        model.setFilter(new Medicamento());
         search(model.getFilter());
+
+        // Notificar listeners locales tras eliminar
+        try {
+            Service.instance().notifyMedicamentoListeners();
+        } catch (Exception ignore) {}
     }
 
     public void clear(){

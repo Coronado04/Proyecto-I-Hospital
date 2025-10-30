@@ -90,7 +90,7 @@ public class ViewMedicos implements PropertyChangeListener {
                         controller.save(n);
                         JOptionPane.showMessageDialog(panel, "Datos guardados exitosamente", "", JOptionPane.INFORMATION_MESSAGE);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(panel, "ID EXISTENTE", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }

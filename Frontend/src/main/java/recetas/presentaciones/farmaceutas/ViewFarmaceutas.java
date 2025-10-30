@@ -84,7 +84,7 @@ public class ViewFarmaceutas implements PropertyChangeListener {
                         JOptionPane.showMessageDialog(panel, "REGISTRO CREADO", "", JOptionPane.INFORMATION_MESSAGE);
 
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(panel, "ID EXISTENTE", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }

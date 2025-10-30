@@ -43,7 +43,7 @@ public class ViewMedicamentos implements PropertyChangeListener {
                         JOptionPane.showMessageDialog(panel, "Medicamento guardado exitosamente", "", JOptionPane.INFORMATION_MESSAGE);
 
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(panel, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(panel, "CÓDIGO EXISTENTE", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }

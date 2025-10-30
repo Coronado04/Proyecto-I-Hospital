@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Service {
     private static Service theInstance;
@@ -71,6 +72,31 @@ public class Service {
             return new RuntimeException(ex);
         }
     }
+
+    // ------------------ Listeners locales para cambios en Medicamento --------------
+    // Usamos CopyOnWriteArrayList para evitar sincronización pesada y para que
+    // los listeners puedan registrarse desde cualquier hilo sin riesgos.
+    private final List<Runnable> medicamentoListeners = new CopyOnWriteArrayList<>();
+
+    public void addMedicamentoListener(Runnable listener) {
+        if (listener != null) medicamentoListeners.add(listener);
+    }
+
+    public void removeMedicamentoListener(Runnable listener) {
+        if (listener != null) medicamentoListeners.remove(listener);
+    }
+
+    public void notifyMedicamentoListeners() {
+        for (Runnable r : medicamentoListeners) {
+            try {
+                r.run();
+            } catch (Throwable t) {
+                // defensivo: no dejamos que un listener rompa las notificaciones
+                t.printStackTrace();
+            }
+        }
+    }
+    // ------------------------------------------------------------------------------
 
     // =============== Medico ===============
     public void create(Medico e) throws Exception {
