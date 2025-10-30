@@ -8,26 +8,19 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
-/**
- * Worker servidor: atiende las peticiones del cliente siguiendo el protocolo.
- *
- * Versión corregida: eliminado el catch(ClassNotFoundException) redundante que
- * producía el error de compilación "Exception 'ClassNotFoundException' is never thrown".
- *
- * Comportamiento:
- * - crea ObjectOutputStream primero y flush() para evitar deadlocks.
- * - responde con ERROR ante fallos por operación y continua atendiendo.
- * - en errores fatales (EOF/SocketException/Throwable fuera del switch) cierra la conexión.
- */
+
 public class Worker implements Runnable {
     private final Server srv;
     private final Socket s;
     private final Service service;
     private ObjectOutputStream os;
     private ObjectInputStream is;
+    private String usuarioId; // ID del usuario logueado
 
     private volatile boolean continuar = false;
     private Thread thread;
+    private boolean esAsync = false;
+
 
     public Worker(Server srv, Socket s, Service service) {
         this.srv = srv;
@@ -560,9 +553,15 @@ public class Worker implements Runnable {
                                 String id = (String) is.readObject();
                                 String clave = (String) is.readObject();
                                 Usuario u = Sesion.login(id, clave);
+
+                                this.usuarioId = u.getId();
+
                                 os.writeInt(Protocol.ERROR_NO_ERROR);
                                 os.writeObject(u);
                                 os.flush();
+
+                                srv.broadcast(Protocol.DELIVER_LOGIN, this.usuarioId, this);
+
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                                 safeWriteErrorAndFlush();
@@ -570,12 +569,12 @@ public class Worker implements Runnable {
                             break;
                         }
 
+
                         case Protocol.USUARIO_CAMBIAR_CLAVE: {
                             try {
                                 String id = (String) is.readObject();
                                 String oldClave = (String) is.readObject();
                                 String nuevaClave = (String) is.readObject();
-                                // validar credenciales actuales antes de actualizar
                                 Sesion.login(id, oldClave);
                                 Sesion.actualizarClave(id, nuevaClave);
                                 os.writeInt(Protocol.ERROR_NO_ERROR);
@@ -588,10 +587,51 @@ public class Worker implements Runnable {
                         }
 
                         case Protocol.DISCONNECT:
-                            // cliente solicita desconexión
+                            if (usuarioId != null) {
+                                srv.broadcast(Protocol.DELIVER_LOGOUT, usuarioId, this);
+                            }
                             stop();
                             srv.remove(this);
                             break;
+                        case Protocol.USUARIO_MENSAJE: {
+                            try {
+                                String origen = (String) is.readObject();
+                                String destino = (String) is.readObject();
+                                String texto = (String) is.readObject();
+                                for (Worker w : srv.workers) {
+                                    if (w != this && w.is != null) {
+                                        // Enviar solo al destinatario exacto
+                                        w.os.writeInt(Protocol.DELIVER_MENSAJE);
+                                        w.os.writeObject(origen);
+                                        w.os.writeObject(texto);
+                                        w.os.flush();
+                                    }
+                                }
+
+                                os.writeInt(Protocol.ERROR_NO_ERROR);
+                                os.flush();
+
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                safeWriteErrorAndFlush();
+                            }
+                            break;
+                        }
+                        case Protocol.ASYNC:
+                            try {
+                                String sid = (String) is.readObject();
+                                String usuarioId = (String) is.readObject();
+                                this.usuarioId = usuarioId;
+                                this.esAsync = true;
+                                os.writeInt(Protocol.ERROR_NO_ERROR);
+                                os.flush();
+                                System.out.println("Listener asíncrono conectado: " + usuarioId);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                safeWriteErrorAndFlush();
+                            }
+                            break;
+
 
                         default:
                             // opcode desconocido
@@ -610,18 +650,16 @@ public class Worker implements Runnable {
                     srv.remove(this);
                     break;
                 }
-            } // fin while
+            }
         } catch (Throwable t) {
-            // Capturamos cualquier throwable no manejado para evitar que escape del hilo
+
             t.printStackTrace();
         } finally {
             closeSilently();
         }
     }
 
-    /**
-     * Intenta escribir el código de error y hacer flush; ignora excepciones al intentar notificar.
-     */
+
     private void safeWriteErrorAndFlush() {
         try {
             if (os != null) {
@@ -647,4 +685,23 @@ public class Worker implements Runnable {
         } catch (Exception ignore) {
         }
     }
+    public void sendAsync(int type, String message) {
+        try {
+            if (os == null) return;
+            os.writeInt(type);
+            os.writeObject(message);
+            os.flush();
+        } catch (IOException e) {
+            System.err.println("Error enviando async: " + e.getMessage());
+        }
+    }
+    public boolean isAsync() {
+        return esAsync;
+    }
+
+    public ObjectOutputStream getOutputStream() {
+        return os;
+    }
+
+
 }

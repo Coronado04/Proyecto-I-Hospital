@@ -1,14 +1,9 @@
 package progra3.logic;
 
 import progra3.data.*;
-
 import java.util.List;
 
-/**
- * Service (backend) - capa de negocio que delega en DAOs.
- * Esta versión NO abre sockets ni streams. Es llamada por Worker para
- * ejecutar operaciones solicitadas por el cliente.
- */
+
 public class Service {
 
     private static Service theInstance;
@@ -35,6 +30,7 @@ public class Service {
         lineaDao = new LineaDao();
         recetaDao = new RecetaDao();
         usuarioDao = new UsuarioDao();
+
     }
 
     // =============== Medico ===============
@@ -237,16 +233,6 @@ public class Service {
     public List<Usuario> search(Usuario e) {
         return usuarioDao.findByNombre(e);
     }
+
 }
 
-//No estoy seguro de esta polla
-//    public int getNextRecetaId() {
-//        if (data.getRecetas().isEmpty()) {
-//            return 1;
-//        }
-//        return data.getRecetas().stream()
-//                .map(r -> r.getIdReceta().replace("REC-", ""))
-//                .mapToInt(Integer::parseInt)
-//                .max()
-//                .orElse(0) + 1;
-//    }

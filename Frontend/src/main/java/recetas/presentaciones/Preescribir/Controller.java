@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.time.LocalDate;
 import java.util.List;
 
-public class Controller  implements ThreadListener{
+public class Controller  implements ThreadListener {
     private ViewPreescribir view;
     private Model model;
 
@@ -130,7 +130,7 @@ public class Controller  implements ThreadListener{
             model.setPacientes(Service.instance().search(new Paciente()));
         } catch (Exception e) {}
     }
-
+    @Override
     public void stop(){
         refresher.stop();
     }

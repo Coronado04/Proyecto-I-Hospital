@@ -40,4 +40,16 @@ public class Server {
         workers.remove(w);
         System.out.println("Quedan: " +workers.size());
     }
+    public synchronized void broadcast(int type, String message, Worker origen) {
+        for (Worker w : workers) {
+            if (w != null && w.isAsync() && w.getOutputStream() != null && w != origen) {
+                try {
+                    w.sendAsync(type, message);
+                } catch (Exception ex) {
+                    System.err.println("Error enviando a listener: " + ex.getMessage());
+                }
+            }
+        }
+    }
+
 }

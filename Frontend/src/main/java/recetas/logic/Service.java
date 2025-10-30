@@ -1,6 +1,7 @@
 package recetas.logic;
 
 import progra3.logic.*;
+import recetas.Sesion;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,14 +9,13 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Service (cliente) - protegido contra accesos concurrentes al socket/streams.
- * Todas las operaciones de red se sincronizan sobre commLock para evitar
- * corrupciones en ObjectOutputStream/ObjectInputStream cuando hay múltiples hilos.
- */
 public class Service {
     private static Service theInstance;
+    private String sid = java.util.UUID.randomUUID().toString();
 
+    public String getSid() {
+        return sid;
+    }
     public static Service instance() {
         if (theInstance == null) theInstance = new Service();
         return theInstance;
@@ -679,5 +679,10 @@ public class Service {
         } catch (Exception ex) {
             throw wrapSocketException(ex);
         }
+    }
+    public ObjectOutputStream getOutputStream() { return os; }
+
+    public String getCurrentUserId() {
+        return Sesion.getUsuario() != null ? Sesion.getUsuario().getId() : "anon";
     }
 }

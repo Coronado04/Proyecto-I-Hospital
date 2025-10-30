@@ -14,6 +14,9 @@ import recetas.presentaciones.logIn.ViewlogIn;
 import recetas.presentaciones.medicamentos.ViewMedicamentos;
 import recetas.presentaciones.medicos.ViewMedicos;
 import recetas.presentaciones.paciente.ViewPaciente;
+import recetas.presentaciones.usuarios.Controller;
+import recetas.presentaciones.usuarios.ViewUsuarios;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -50,9 +53,15 @@ public class Application {
     }
 
     private static void doRun() {
+        ViewUsuarios viewUsuarios = new ViewUsuarios();
+        recetas.presentaciones.usuarios.Model modelUsuarios=new recetas.presentaciones.usuarios.Model();
+        recetas.presentaciones.usuarios.Controller controllerUsuario=new Controller(viewUsuarios, modelUsuarios);
+        JPanel usuarios = viewUsuarios.getPanelExterno();
+
         ventana = new JFrame();
         JTabbedPane tabbedPane = new JTabbedPane();
-        ventana.setContentPane(tabbedPane);
+        ventana.add(tabbedPane, BorderLayout.CENTER);
+        ventana.add(usuarios,BorderLayout.EAST);
 
         ventana.addWindowListener(new WindowAdapter() {
             @Override

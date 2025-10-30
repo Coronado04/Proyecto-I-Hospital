@@ -61,7 +61,15 @@ public class Protocol {
     public static final int USUARIO_LOGIN = 707;
     public static final int USUARIO_CAMBIAR_CLAVE = 708;
 
+    public static final int DELIVER_LOGIN = 800;
+    public static final int DELIVER_LOGOUT = 801;
 
+    // -------- MENSAJES ENTRE USUARIOS --------
+    public static final int USUARIO_MENSAJE = 709;   // Cliente -> Servidor
+    public static final int DELIVER_MENSAJE = 802;   // Servidor -> Cliente
+
+    public static final int SYNC=97;
+    public static final int ASYNC=98;
     public static final int DISCONNECT = 99;
 
     public static final int ERROR_NO_ERROR = 0;
