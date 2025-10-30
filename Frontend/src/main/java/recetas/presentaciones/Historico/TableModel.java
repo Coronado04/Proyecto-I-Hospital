@@ -17,13 +17,15 @@ public class TableModel extends AbstractTableModel<Receta> implements javax.swin
     public static final int ESTADO = 4;
 
     @Override
-    protected Object getPropetyAt(Receta e, int col) {
+    protected Object getPropetyAt(Object obj, int col) {
+        if (!(obj instanceof Receta)) return "";
+        Receta e = (Receta) obj;
         switch (cols[col]) {
             case IDRECETA:
                 return e.getIdReceta();
             case NOMBREPACIENTE:
                 return e.getPaciente().getNombre();
-             case IDPACIENTE:
+            case IDPACIENTE:
                 return e.getPaciente().getId();
             case NOMBREMEDICO:
                 return e.getMedico().getNombre();
@@ -44,4 +46,3 @@ public class TableModel extends AbstractTableModel<Receta> implements javax.swin
         colNames[ESTADO] = "Estado";
     }
 }
-

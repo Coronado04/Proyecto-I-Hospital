@@ -685,4 +685,29 @@ public class Service {
     public String getCurrentUserId() {
         return Sesion.getUsuario() != null ? Sesion.getUsuario().getId() : "anon";
     }
+
+    /**
+     * Enviar un mensaje de usuario de forma segura (serializa operaciones en commLock).
+     * Este método asegura que no se intercalen escrituras/lecturas en el ObjectStream compartido.
+     */
+    public void sendUserMessage(String destino, String mensaje) throws Exception {
+        ensureConnected();
+        try {
+            synchronized (commLock) {
+                os.writeInt(Protocol.USUARIO_MENSAJE);
+                os.writeObject(getCurrentUserId());
+                os.writeObject(destino);
+                os.writeObject(mensaje);
+                os.flush();
+                // leer ack/estado del servidor
+                int status = is.readInt();
+                if (status != Protocol.ERROR_NO_ERROR) {
+                    throw new Exception("Error al enviar mensaje (status=" + status + ")");
+                }
+            }
+        } catch (Exception ex) {
+            throw wrapSocketException(ex);
+        }
+    }
+
 }

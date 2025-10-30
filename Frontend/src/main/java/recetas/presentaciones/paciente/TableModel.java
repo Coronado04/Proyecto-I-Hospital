@@ -23,7 +23,9 @@ public class TableModel extends AbstractTableModel<Paciente> implements javax.sw
         colNames[Telefono] = "Telefono";
     }
     @Override
-    protected Object getPropetyAt(Paciente e, int col) {
+    protected Object getPropetyAt(Object obj, int col) {
+        if (!(obj instanceof Paciente)) return "";
+        Paciente e = (Paciente) obj;
         switch (cols[col]) {
             case ID:
                 return e.getId();
@@ -31,15 +33,10 @@ public class TableModel extends AbstractTableModel<Paciente> implements javax.sw
                 return e.getNombre();
             case FechaDeNacimiento:
                 return e.getFechaNacimiento();
-                case Telefono:
-                    return e.getNumero();
+            case Telefono:
+                return e.getNumero();
             default:
                 return "";
         }
     }
-
-
-
-
-
 }

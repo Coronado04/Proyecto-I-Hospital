@@ -21,7 +21,9 @@ public class TableModel extends AbstractTableModel<Farmaceuta> implements javax.
         colNames[NOMBRE] = "Nombre";
     }
     @Override
-    protected Object getPropetyAt(Farmaceuta e, int col) {
+    protected Object getPropetyAt(Object obj, int col) {
+        if (!(obj instanceof Farmaceuta)) return "";
+        Farmaceuta e = (Farmaceuta) obj;
         switch (cols[col]) {
             case ID:
                 return e.getId();

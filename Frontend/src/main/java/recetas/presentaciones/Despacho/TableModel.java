@@ -17,7 +17,9 @@ public class TableModel extends AbstractTableModel<Receta> implements javax.swin
     public static final int ESTADO = 4;
 
     @Override
-    protected Object getPropetyAt(Receta e, int col) {
+    protected Object getPropetyAt(Object obj, int col) {
+        if (!(obj instanceof Receta)) return "";
+        Receta e = (Receta) obj;
         switch (cols[col]) {
             case IDRECETA:
                 return e.getIdReceta();

@@ -6,14 +6,14 @@ import recetas.logic.SocketListener;
 import recetas.presentaciones.UsuariosThreadListener;
 
 import javax.swing.*;
-import java.io.ObjectOutputStream;
 import java.util.*;
 
 /**
- * Controller actualizado para:
- * - recibir notificaciones de mensajes como "pendientes"
- * - marcar visualmente remitentes con mensajes pendientes
- * - permitir al usuario seleccionar el remitente y pulsar "Recibir" para ver el contenido
+ * Controller de Usuarios:
+ * - mantiene pendingMessages (origin -> list of messages)
+ * - mantiene pendingIds (set de remitentes con mensajes pendientes) para que la vista marque filas
+ * - al llegar deliver_Mensaje() guarda el mensaje pendiente y marca la fila; NO muestra diálogo inmediato
+ * - al pulsar "Recibir" se muestran los mensajes pendientes para la fila seleccionada
  */
 public class Controller implements UsuariosThreadListener {
     private ViewUsuarios view;
@@ -32,11 +32,10 @@ public class Controller implements UsuariosThreadListener {
         view.setController(this);
         view.setModel(model);
 
-        // Inyectar la referencia de pendingIds en la vista para que pueda renderizar filas marcadas
+        // Inyectar el supplier para que la vista pueda pintar filas con mensajes pendientes
         view.setPendingIdsSupplier(() -> Collections.unmodifiableSet(pendingIds));
 
         try {
-            // Service.instance().getSid() debe existir (ver Service más abajo)
             socketListener = new SocketListener(this, Service.instance().getSid());
             socketListener.start();
         } catch (Exception e) {
@@ -52,7 +51,6 @@ public class Controller implements UsuariosThreadListener {
 
     @Override
     public void deliver_Login(String idUsuario) {
-        // Evitar duplicados: si ya existe usuario con ese id, no lo agregamos
         boolean existe = model.getList().stream().anyMatch(u -> u.getId() != null && u.getId().equals(idUsuario));
         if (!existe) {
             Usuario u = new Usuario();
@@ -63,12 +61,9 @@ public class Controller implements UsuariosThreadListener {
 
     @Override
     public void deliver_Logout(String idUsuario) {
-        // Eliminar usuario de la lista si existe
         model.getList().removeIf(u -> u.getId() != null && u.getId().equals(idUsuario));
-        // Notificar cambio
         model.setList(model.getList());
-
-        // limpiar mensajes pendientes de ese usuario (si corresponde)
+        // limpiar pendientes de logout
         pendingMessages.remove(idUsuario);
         pendingIds.remove(idUsuario);
         view.repaintTable();
@@ -76,12 +71,11 @@ public class Controller implements UsuariosThreadListener {
 
     @Override
     public void deliver_Mensaje(String origen, String mensaje) {
-        // <-- ya estamos en EDT porque SocketListener usa SwingUtilities.invokeLater
-        // Guardar mensaje pendiente
+        // Guardar mensaje en la cola de pendientes y marcar remitente
         pendingMessages.computeIfAbsent(origen, k -> new ArrayList<>()).add(mensaje);
         pendingIds.add(origen);
 
-        // Asegurarnos de que el remitente figura en la lista de usuarios (si no, añadirlo)
+        // Asegurarnos de que el remitente aparece en la lista de usuarios
         boolean existe = model.getList().stream().anyMatch(u -> u.getId() != null && u.getId().equals(origen));
         if (!existe) {
             Usuario u = new Usuario();
@@ -89,9 +83,9 @@ public class Controller implements UsuariosThreadListener {
             model.agregarUsuario(u);
         }
 
-        // Notificar a la vista para que marque la fila correspondiente
-        view.setPendingIdsSupplier(() -> Collections.unmodifiableSet(pendingIds));
+        // Pedir a la vista que repinte para mostrar la marca visual
         view.repaintTable();
+        // NO mostrar diálogo aquí: el usuario debe seleccionar la fila y pulsar "Recibir"
     }
 
     // ---- Métodos para botones (NO @Override) ----
@@ -101,18 +95,8 @@ public class Controller implements UsuariosThreadListener {
                 "Mensaje para " + destino.getId() + ":");
         if (mensaje == null || mensaje.trim().isEmpty()) return;
 
-        ObjectOutputStream os = Service.instance().getOutputStream();
-        if (os == null) throw new Exception("No conectado al servidor.");
-
-        synchronized (Service.instance()) {
-            os.writeInt(progra3.logic.Protocol.USUARIO_MENSAJE);
-            os.writeObject(Service.instance().getCurrentUserId());
-            os.writeObject(destino.getId());
-            os.writeObject(mensaje);
-            os.flush();
-        }
-
-        // No mostrar notificación local al remitente (el receptor verá la notificación)
+        // Usar API de Service que sincroniza el stream correctamente
+        Service.instance().sendUserMessage(destino.getId(), mensaje);
     }
 
     public void recibir(int row) throws Exception {
@@ -129,7 +113,6 @@ public class Controller implements UsuariosThreadListener {
             return;
         }
 
-        // Mostrar todos los mensajes pendientes en un solo diálogo (puedes adaptar formato)
         StringBuilder sb = new StringBuilder();
         for (String m : mensajes) {
             sb.append(m).append("\n\n");
@@ -140,7 +123,6 @@ public class Controller implements UsuariosThreadListener {
 
         // quitar la marca visual y refrescar la vista
         pendingIds.remove(id);
-        view.setPendingIdsSupplier(() -> Collections.unmodifiableSet(pendingIds));
         view.repaintTable();
     }
 }

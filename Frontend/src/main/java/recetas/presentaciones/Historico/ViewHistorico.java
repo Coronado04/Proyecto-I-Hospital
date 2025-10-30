@@ -18,7 +18,6 @@ public class ViewHistorico implements PropertyChangeListener {
     private JTable table1;
     private JButton mostrarDetalles;
     private JPanel panel;
-    private JButton actualizar;
     private Model model;
     private Controller controller;
 
@@ -60,26 +59,6 @@ public class ViewHistorico implements PropertyChangeListener {
             }
         });
 
-        actualizar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String texto = IDPacienteText.getText().trim();
-                    Receta filter = new Receta();
-                    if (!texto.isEmpty()) {
-                        Paciente p = new Paciente();
-                        p.setId(texto);
-                        filter.setPaciente(p);
-                    }
-
-                    controller.search(filter);
-
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(panel, ex.getMessage(),
-                            "Información", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-        });
 
 
         table1.addMouseListener(new MouseAdapter() {

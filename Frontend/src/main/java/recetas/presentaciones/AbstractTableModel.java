@@ -27,10 +27,11 @@ public abstract class AbstractTableModel<E> extends javax.swing.table.AbstractTa
         return rows.size();
     }
     public Object getValueAt(int row, int col) {
-        E e = rows.get(row);
+        Object e = rows.get(row); // usar Object para evitar cast implícito por JVM
         return getPropetyAt(e, col);
     }
-    protected abstract Object getPropetyAt(E e, int col);
+    // ahora con Object para evitar ClassCastException antes de entrar al método
+    protected abstract Object getPropetyAt(Object e, int col);
     public E getRowAt(int row) {
         return rows.get(row);
     }

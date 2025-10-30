@@ -21,6 +21,9 @@ public class Worker implements Runnable {
     private Thread thread;
     private boolean esAsync = false;
 
+    // Bandera para evitar notificar logout varias veces
+    private boolean loggedOutNotified = false;
+
 
     public Worker(Server srv, Socket s, Service service) {
         this.srv = srv;
@@ -67,11 +70,27 @@ public class Worker implements Runnable {
                 try {
                     method = is.readInt();
                 } catch (EOFException eof) {
-                    // cliente cerró conexión de forma limpia -> salir
+                    // cliente cerró conexión de forma limpia -> avisar logout si corresponde y salir
                     System.out.println("Cliente cerró la conexión: " + s.getRemoteSocketAddress());
+                    if (usuarioId != null && !loggedOutNotified) {
+                        try {
+                            srv.broadcast(Protocol.DELIVER_LOGOUT, usuarioId, this);
+                        } catch (Exception ex) {
+                            System.err.println("Error broadcasting logout on EOF: " + ex.getMessage());
+                        }
+                        loggedOutNotified = true;
+                    }
                     break;
                 } catch (SocketException se) {
                     System.out.println("Socket cerrado: " + se.getMessage());
+                    if (usuarioId != null && !loggedOutNotified) {
+                        try {
+                            srv.broadcast(Protocol.DELIVER_LOGOUT, usuarioId, this);
+                        } catch (Exception ex) {
+                            System.err.println("Error broadcasting logout on SocketException: " + ex.getMessage());
+                        }
+                        loggedOutNotified = true;
+                    }
                     break;
                 }
 
@@ -589,6 +608,7 @@ public class Worker implements Runnable {
                         case Protocol.DISCONNECT:
                             if (usuarioId != null) {
                                 srv.broadcast(Protocol.DELIVER_LOGOUT, usuarioId, this);
+                                loggedOutNotified = true;
                             }
                             stop();
                             srv.remove(this);
@@ -686,6 +706,23 @@ public class Worker implements Runnable {
 
             t.printStackTrace();
         } finally {
+            // Asegurarnos de notificar logout si no se notificó antes (p. ej. cierre inesperado)
+            try {
+                if (!loggedOutNotified && usuarioId != null) {
+                    try {
+                        srv.broadcast(Protocol.DELIVER_LOGOUT, usuarioId, this);
+                    } catch (Exception ex) {
+                        System.err.println("Error broadcasting logout in finally: " + ex.getMessage());
+                    }
+                    loggedOutNotified = true;
+                }
+            } catch (Throwable ignored) {}
+
+            // Eliminar worker de la lista del servidor si aún está presente
+            try {
+                srv.remove(this);
+            } catch (Throwable ignored) {}
+
             closeSilently();
         }
     }

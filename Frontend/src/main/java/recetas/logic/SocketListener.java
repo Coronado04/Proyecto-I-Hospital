@@ -11,6 +11,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+/**
+ * SocketListener: hilo que escucha mensajes asíncronos del servidor.
+ * - Envía los eventos al listener (UsuariosThreadListener) dentro del EDT usando SwingUtilities.invokeLater.
+ * - NO muestra diálogos por su cuenta: delega el comportamiento en el listener.
+ */
 public class SocketListener {
     private UsuariosThreadListener listener;
 
@@ -43,6 +48,7 @@ public class SocketListener {
     }
     public void stop() {
         condition = false;
+        try { as.close(); } catch (Exception ignored) {}
     }
 
     public void listen() {
@@ -53,50 +59,54 @@ public class SocketListener {
                 switch (method) {
                     case Protocol.DELIVER_LOGIN:
                         try {
-                            String message = (String) ais.readObject();
-                            deliver_login(message);
-                        } catch (ClassNotFoundException ex) {}
+                            final String message = (String) ais.readObject();
+                            // entregar en EDT: el listener debe decidir qué hacer (agregar usuario)
+                            SwingUtilities.invokeLater(() -> {
+                                try {
+                                    listener.deliver_Login(message);
+                                } catch (Throwable ex) {
+                                    // defensivo: no dejar que excepciones del listener rompan el hilo
+                                    ex.printStackTrace();
+                                }
+                            });
+                        } catch (ClassNotFoundException ex) { ex.printStackTrace(); }
                         break;
                     case Protocol.DELIVER_LOGOUT:
                         try {
-                            String message = (String) ais.readObject();
-                            deliver_logout(message);
-                        } catch (ClassNotFoundException ex) {}
+                            final String message = (String) ais.readObject();
+                            SwingUtilities.invokeLater(() -> {
+                                try {
+                                    listener.deliver_Logout(message);
+                                } catch (Throwable ex) { ex.printStackTrace(); }
+                            });
+                        } catch (ClassNotFoundException ex) { ex.printStackTrace(); }
                         break;
                     case Protocol.DELIVER_MENSAJE:
                         try {
-                            String origen = (String) ais.readObject();
-                            String texto = (String) ais.readObject();
-                            deliver_mensaje(origen, texto);
-                        } catch (ClassNotFoundException ex) {}
+                            final String origen = (String) ais.readObject();
+                            final String texto = (String) ais.readObject();
+                            // NOTA: No mostrar diálogo aquí. Delegar la gestión al listener (que guardará el mensaje pendiente).
+                            SwingUtilities.invokeLater(() -> {
+                                try {
+                                    listener.deliver_Mensaje(origen, texto);
+                                } catch (Throwable ex) { ex.printStackTrace(); }
+                            });
+                        } catch (ClassNotFoundException ex) { ex.printStackTrace(); }
                         break;
 
+                    default:
+                        // opcode desconocido -> ignorar o log
+                        //System.err.println("SocketListener: opcode desconocido recibido: " + method);
+                        break;
                 }
-            } catch(IOException ex){ condition = false;}
+            } catch(IOException ex){
+                condition = false;
+                // intentar cerrar y notificar si se desea
+            }
         }
         try {
             as.shutdownOutput();
             as.close();
         } catch (IOException e) {}
     }
-
-    private void deliver_login(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() { listener.deliver_Login(message);}//==>error en esta linea
-        });
-    }
-
-    private void deliver_logout(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() { listener.deliver_Logout(message);}//==>error en esta linea
-        });
-    }
-    private void deliver_mensaje(final String origen, final String texto) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                listener.deliver_Mensaje(origen, texto);
-            }
-        });
-    }
-
 }

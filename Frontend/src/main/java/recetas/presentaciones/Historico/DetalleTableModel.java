@@ -18,7 +18,9 @@ public class DetalleTableModel extends AbstractTableModel<Linea> implements java
     }
 
     @Override
-    protected Object getPropetyAt(Linea linea, int col) {
+    protected Object getPropetyAt(Object obj, int col) {
+        if (!(obj instanceof Linea)) return "";
+        Linea linea = (Linea) obj;
         switch (cols[col]) {
             case MEDICAMENTO:
                 return linea.getMedicamento().getNombre();
