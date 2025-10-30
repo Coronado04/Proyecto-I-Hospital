@@ -1,6 +1,5 @@
 package progra3.data;
 
-
 import progra3.logic.Farmaceuta;
 
 import java.sql.PreparedStatement;
@@ -67,8 +66,22 @@ public class FarmaceutaDao {
         }
     }
 
+    /**
+     * Soporta búsqueda por id EXACTA si se proporciona, o por nombre con LIKE si no.
+     */
     public List<Farmaceuta> findByNombre(Farmaceuta filtro) {
         List<Farmaceuta> resultado = new ArrayList<>();
+
+        if (filtro != null && filtro.getId() != null && !filtro.getId().trim().isEmpty()) {
+            try {
+                Farmaceuta f = read(filtro.getId().trim());
+                resultado.add(f);
+            } catch (Exception ex) {
+                // no existe -> lista vacía
+            }
+            return resultado;
+        }
+
         String nombreFiltro = (filtro != null && filtro.getNombre() != null) ? filtro.getNombre().trim() : "";
         String sql = "SELECT id, nombre, clave FROM Farmaceuta WHERE nombre LIKE ? ORDER BY nombre";
         try (PreparedStatement stm = db.prepareStatement(sql)) {

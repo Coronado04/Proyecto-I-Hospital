@@ -1,6 +1,5 @@
 package progra3.data;
 
-
 import progra3.logic.Medico;
 
 import java.sql.PreparedStatement;
@@ -67,8 +66,25 @@ public class MedicoDao {
         }
     }
 
+    /**
+     * Si filtro.getId() está presente, devuelve el registro con ese id (lista con 0/1 elementos).
+     * Si no, hace búsqueda por nombre (LIKE).
+     */
     public List<Medico> findByNombre(Medico filtro){
-        List<Medico> resultado= new ArrayList<Medico>();
+        List<Medico> resultado= new ArrayList<>();
+
+        // Si se busca por id exacto
+        if (filtro != null && filtro.getId() != null && !filtro.getId().trim().isEmpty()) {
+            try {
+                Medico m = read(filtro.getId().trim());
+                resultado.add(m);
+            } catch (Exception ex) {
+                // no existe -> devolver lista vacía
+            }
+            return resultado;
+        }
+
+        // Búsqueda por nombre (LIKE) por compatibilidad
         String sql = "SELECT id, nombre, especialidad, clave FROM Medico WHERE nombre LIKE ? ORDER BY nombre";
         String nombreFiltro = "";
         if (filtro != null && filtro.getNombre() != null) {

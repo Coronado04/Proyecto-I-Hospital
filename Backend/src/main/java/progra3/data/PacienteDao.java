@@ -1,6 +1,5 @@
 package progra3.data;
 
-
 import progra3.logic.Paciente;
 
 import java.sql.PreparedStatement;
@@ -78,8 +77,23 @@ public class PacienteDao {
         }
     }
 
+    /**
+     * Si filtro.getId() está presente devuelve ese paciente (lista 0/1).
+     * Si no, hace búsqueda por nombre LIKE.
+     */
     public List<Paciente> findByNombre(Paciente filtro) {
         List<Paciente> resultado = new ArrayList<>();
+
+        if (filtro != null && filtro.getId() != null && !filtro.getId().trim().isEmpty()) {
+            try {
+                Paciente p = read(filtro.getId().trim());
+                resultado.add(p);
+            } catch (Exception ex) {
+                // no existe -> lista vacía
+            }
+            return resultado;
+        }
+
         String sql = "SELECT p.id, p.nombre, p.fechaNacimiento, p.telefono FROM Paciente p WHERE p.nombre LIKE ? ORDER BY p.nombre";
         String nombreFiltro = "";
         if (filtro != null && filtro.getNombre() != null) {

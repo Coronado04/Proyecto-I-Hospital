@@ -18,7 +18,7 @@ public class MedicamentoDao {
     public void create(Medicamento m) throws Exception {
         String sql = "INSERT INTO Medicamento (codigo, nombre, presentacion) VALUES (?,?,?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            // ahora codigo es VARCHAR, usamos setString directamente
+            // codigo ahora es VARCHAR: usar setString
             stm.setString(1, m.getCodigo() != null ? m.getCodigo().trim() : null);
             stm.setString(2, m.getNombre());
             stm.setString(3, m.getPresentacion());
@@ -67,8 +67,22 @@ public class MedicamentoDao {
         }
     }
 
+    /**
+     * Si filtro.getCodigo() está presente devuelve lista con ese medicamento (0/1).
+     * Si no, hace búsqueda por nombre LIKE.
+     */
     public List<Medicamento> findByNombre(Medicamento filtro) {
         List<Medicamento> resultado = new ArrayList<>();
+        if (filtro != null && filtro.getCodigo() != null && !filtro.getCodigo().trim().isEmpty()) {
+            try {
+                Medicamento m = read(filtro.getCodigo().trim());
+                resultado.add(m);
+            } catch (Exception ex) {
+                // no existe
+            }
+            return resultado;
+        }
+
         String nombreFiltro = "";
         if (filtro != null && filtro.getNombre() != null) {
             nombreFiltro = filtro.getNombre().trim();
@@ -88,13 +102,10 @@ public class MedicamentoDao {
         return resultado;
     }
 
-    // mapper sin alias (usar los nombres reales de columnas)
     public Medicamento from(ResultSet rs) {
         try {
             Medicamento m = new Medicamento();
-            // obtener codigo como string
-            String codigo = rs.getString("codigo");
-            m.setCodigo(codigo != null ? codigo : "");
+            m.setCodigo(rs.getString("codigo"));
             m.setNombre(rs.getString("nombre"));
             m.setPresentacion(rs.getString("presentacion"));
             return m;
@@ -103,5 +114,4 @@ public class MedicamentoDao {
             return null;
         }
     }
-
 }
