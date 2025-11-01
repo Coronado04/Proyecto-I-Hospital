@@ -19,7 +19,6 @@ public class Server {
         } catch (IOException ex) { System.out.println(ex);}
     }
     public void run() {
-        // Usar el singleton en lugar de new Service()
         Service service = Service.instance();
         boolean continuar = true;
         Socket s;

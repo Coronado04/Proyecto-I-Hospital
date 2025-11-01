@@ -188,7 +188,6 @@ public class Controller implements ThreadListener {
         int anioFin = model.getRango().getAnioFin();
         int mesFin = model.getRango().getMesFin();
 
-        // Contar las recetas por estado
         Map<Receta.Estado, Integer> estadoCount = new HashMap<>();
         int totalRecetas = 0;
 

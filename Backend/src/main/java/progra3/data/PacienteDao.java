@@ -26,7 +26,7 @@ public class PacienteDao {
             } else {
                 stm.setNull(3, Types.DATE);
             }
-            stm.setString(4, p.getNumero()); // mapa al campo telefono en BD
+            stm.setString(4, p.getNumero());
             int count = stm.executeUpdate();
             if (count == 0) {
                 throw new Exception("Paciente ya existe");
@@ -77,10 +77,6 @@ public class PacienteDao {
         }
     }
 
-    /**
-     * Si filtro.getId() está presente devuelve ese paciente (lista 0/1).
-     * Si no, hace búsqueda por nombre LIKE.
-     */
     public List<Paciente> findByNombre(Paciente filtro) {
         List<Paciente> resultado = new ArrayList<>();
 
@@ -89,7 +85,6 @@ public class PacienteDao {
                 Paciente p = read(filtro.getId().trim());
                 resultado.add(p);
             } catch (Exception ex) {
-                // no existe -> lista vacía
             }
             return resultado;
         }

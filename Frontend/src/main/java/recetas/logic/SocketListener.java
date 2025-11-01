@@ -11,11 +11,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-/**
- * SocketListener: hilo que escucha mensajes asíncronos del servidor.
- * - Envía los eventos al listener (UsuariosThreadListener) dentro del EDT usando SwingUtilities.invokeLater.
- * - NO muestra diálogos por su cuenta: delega el comportamiento en el listener.
- */
 public class SocketListener {
     private UsuariosThreadListener listener;
 
@@ -60,13 +55,11 @@ public class SocketListener {
                     case Protocol.DELIVER_LOGIN:
                         try {
                             final String message = (String) ais.readObject();
-                            // entregar en EDT: el listener debe decidir qué hacer (agregar usuario)
-                            SwingUtilities.invokeLater(() -> {
+                          SwingUtilities.invokeLater(() -> {
                                 try {
                                     listener.deliver_Login(message);
                                 } catch (Throwable ex) {
-                                    // defensivo: no dejar que excepciones del listener rompan el hilo
-                                    ex.printStackTrace();
+                                 ex.printStackTrace();
                                 }
                             });
                         } catch (ClassNotFoundException ex) { ex.printStackTrace(); }
@@ -85,8 +78,7 @@ public class SocketListener {
                         try {
                             final String origen = (String) ais.readObject();
                             final String texto = (String) ais.readObject();
-                            // NOTA: No mostrar diálogo aquí. Delegar la gestión al listener (que guardará el mensaje pendiente).
-                            SwingUtilities.invokeLater(() -> {
+                           SwingUtilities.invokeLater(() -> {
                                 try {
                                     listener.deliver_Mensaje(origen, texto);
                                 } catch (Throwable ex) { ex.printStackTrace(); }
@@ -95,13 +87,10 @@ public class SocketListener {
                         break;
 
                     default:
-                        // opcode desconocido -> ignorar o log
-                        //System.err.println("SocketListener: opcode desconocido recibido: " + method);
                         break;
                 }
             } catch(IOException ex){
                 condition = false;
-                // intentar cerrar y notificar si se desea
             }
         }
         try {

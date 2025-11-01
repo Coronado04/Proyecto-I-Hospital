@@ -14,17 +14,12 @@ public class LineaDao {
         db = Database.instance();
     }
 
-    /**
-     * Inserta una línea asociada a la receta cuyo idReceta (string con número) se recibe.
-     * Ahora trata medicamento como VARCHAR (codigo String).
-     */
     public void create(Linea l, String idReceta) throws Exception {
         String sql = "INSERT INTO Linea (receta, medicamento, cantidad, indicaciones, duracionDias) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             if (idReceta != null && !idReceta.isEmpty()) {
                 try {
-                    // receta sigue siendo INT en BD (numero), si idReceta es string con número, intentar parseInt
-                    stm.setInt(1, Integer.parseInt(idReceta));
+                   stm.setInt(1, Integer.parseInt(idReceta));
                 } catch (NumberFormatException ex) {
                     stm.setNull(1, Types.INTEGER);
                 }
@@ -32,7 +27,6 @@ public class LineaDao {
                 stm.setNull(1, Types.INTEGER);
             }
 
-            // medicamento ahora es VARCHAR: setString con el codigo
             stm.setString(2, l.getMedicamento() != null ? l.getMedicamento().getCodigo() : null);
             stm.setInt(3, l.getCantidad());
             stm.setString(4, l.getIndicaciones());

@@ -22,20 +22,13 @@ public class Service {
         return theInstance;
     }
 
-    // Streams del socket al backend (deben inyectarse desde el Controller al hacer login)
     private transient ObjectOutputStream os;
     private transient ObjectInputStream is;
 
-    // Lock para serializar todas las operaciones sobre os/is
     private final Object commLock = new Object();
 
     private Service() {
-        // no crear socket aquí; será inyectado por el Controller
     }
-
-    /**
-     * Inyectar los streams (una única vez) después de crear la conexión en el Controller.
-     */
     public synchronized void setStreams(ObjectOutputStream os, ObjectInputStream is) {
         this.os = os;
         this.is = is;
@@ -53,7 +46,6 @@ public class Service {
             os.writeInt(Protocol.DISCONNECT);
             os.flush();
         }
-        // no cerramos streams/sockets aquí: quién los creó (Controller) los debe cerrar
     }
 
     public void stop() {
@@ -64,7 +56,6 @@ public class Service {
         }
     }
 
-    // ----------------- Helpers -----------------
     private RuntimeException wrapSocketException(Exception ex) {
         if (ex instanceof SocketException) {
             return new RuntimeException("Conexión con el servidor perdida: " + ex.getMessage(), ex);
@@ -73,9 +64,6 @@ public class Service {
         }
     }
 
-    // ------------------ Listeners locales para cambios en Medicamento --------------
-    // Usamos CopyOnWriteArrayList para evitar sincronización pesada y para que
-    // los listeners puedan registrarse desde cualquier hilo sin riesgos.
     private final List<Runnable> medicamentoListeners = new CopyOnWriteArrayList<>();
 
     public void addMedicamentoListener(Runnable listener) {
@@ -91,12 +79,10 @@ public class Service {
             try {
                 r.run();
             } catch (Throwable t) {
-                // defensivo: no dejamos que un listener rompa las notificaciones
                 t.printStackTrace();
             }
         }
     }
-    // ------------------------------------------------------------------------------
 
     // =============== Medico ===============
     public void create(Medico e) throws Exception {
@@ -712,10 +698,7 @@ public class Service {
         return Sesion.getUsuario() != null ? Sesion.getUsuario().getId() : "anon";
     }
 
-    /**
-     * Enviar un mensaje de usuario de forma segura (serializa operaciones en commLock).
-     * Este método asegura que no se intercalen escrituras/lecturas en el ObjectStream compartido.
-     */
+
     public void sendUserMessage(String destino, String mensaje) throws Exception {
         ensureConnected();
         try {
@@ -725,7 +708,6 @@ public class Service {
                 os.writeObject(destino);
                 os.writeObject(mensaje);
                 os.flush();
-                // leer ack/estado del servidor
                 int status = is.readInt();
                 if (status != Protocol.ERROR_NO_ERROR) {
                     throw new Exception("Error al enviar mensaje (status=" + status + ")");

@@ -7,13 +7,12 @@ public class Linea implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private int numero; // número de la línea en BD
+    private int numero;
     private Medicamento medicamento;
     private int cantidad;
     private String indicaciones;
     private int duracionDias;
 
-    // Nueva propiedad: fecha de la receta (para agrupaciones en dashboard)
     private LocalDate fechaReceta;
 
     public Linea() {}
@@ -31,7 +30,6 @@ public class Linea implements Serializable {
         this.indicaciones = indicaciones;
         this.duracionDias = duracionDias;
     }
-    // Getters y setters
     public int getNumero() { return numero; }
     public void setNumero(int numero) { this.numero = numero; }
 

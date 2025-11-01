@@ -22,9 +22,6 @@ public class Sesion {
         return usuario != null;
     }
 
-    // ==========================================================
-    // LOGIN DESDE BASE DE DATOS
-    // ==========================================================
     public static Usuario login(String id, String clave) throws Exception {
         String sql =
                 "SELECT id, nombre, clave, rol, 1 AS pri FROM Usuario WHERE id=? AND clave=? " +
@@ -32,10 +29,7 @@ public class Sesion {
                         "SELECT id, nombre, clave, 'medico' AS rol, 2 AS pri FROM Medico WHERE id=? AND clave=? " +
                         "UNION ALL " +
                         "SELECT id, nombre, clave, 'farmaceuta' AS rol, 3 AS pri FROM Farmaceuta WHERE id=? AND clave=? " +
-                        // Usa una de estas según tu motor de BD:
-                        // "ORDER BY pri LIMIT 1";                   // MySQL / PostgreSQL
-                        // "ORDER BY pri OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY"; // Oracle / DB2 (12c+)
-                        "ORDER BY pri LIMIT 1"; // ← Ajusta esta línea a tu motor
+                        "ORDER BY pri LIMIT 1";
 
         PreparedStatement stm = db.prepareStatement(sql);
         int i = 1;
@@ -52,7 +46,7 @@ public class Sesion {
             Usuario u = new Usuario();
             u.setId(rs.getString("id"));
             u.setNombre(rs.getString("nombre"));
-            u.setClave(rs.getString("clave")); // Idealmente NO devolver la clave
+            u.setClave(rs.getString("clave"));
             u.setRol(rs.getString("rol"));
 
             usuario = u;
@@ -62,21 +56,18 @@ public class Sesion {
         }
     }
 
-    // ==========================================================
-    // CAMBIAR CLAVE EN LA BASE DE DATOS
-    // ==========================================================
     public static void actualizarClave(String id, String nuevaClave) throws Exception {
-        String[] tablas = { "Usuario", "Medico", "Farmaceuta" }; // misma prioridad que en login
+        String[] tablas = { "Usuario", "Medico", "Farmaceuta" };
         int updated = 0;
 
         for (String tabla : tablas) {
             String sql = "UPDATE " + tabla + " SET clave=? WHERE id=?";
             try (PreparedStatement stm = db.prepareStatement(sql)) {
-                stm.setString(1, nuevaClave); // <-- sin comillas en el SQL
+                stm.setString(1, nuevaClave);
                 stm.setString(2, id);
                 updated = db.executeUpdate(stm);
             }
-            if (updated > 0) break; // ya lo encontramos y actualizamos
+            if (updated > 0) break;
         }
 
         if (updated == 0) {

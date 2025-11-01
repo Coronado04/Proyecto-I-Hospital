@@ -100,15 +100,11 @@ public class UsuarioDao {
         return resultado;
     }
 
-    // ------------ Mapper ------------
     private Usuario from(ResultSet rs) throws SQLException {
-        // leer por nombre de columna real (sin alias + '.')
         String id = rs.getString("id");
         String nombre = rs.getString("nombre");
         String clave = rs.getString("clave");
         String rol = rs.getString("rol");
-
-        // conservar constructor original (nombre, id, clave, rol)
         return new Usuario(nombre, id, clave, rol);
     }
 }

@@ -18,7 +18,6 @@ public class MedicamentoDao {
     public void create(Medicamento m) throws Exception {
         String sql = "INSERT INTO Medicamento (codigo, nombre, presentacion) VALUES (?,?,?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            // codigo ahora es VARCHAR: usar setString
             stm.setString(1, m.getCodigo() != null ? m.getCodigo().trim() : null);
             stm.setString(2, m.getNombre());
             stm.setString(3, m.getPresentacion());
@@ -67,10 +66,6 @@ public class MedicamentoDao {
         }
     }
 
-    /**
-     * Si filtro.getCodigo() está presente devuelve lista con ese medicamento (0/1).
-     * Si no, hace búsqueda por nombre LIKE.
-     */
     public List<Medicamento> findByNombre(Medicamento filtro) {
         List<Medicamento> resultado = new ArrayList<>();
         if (filtro != null && filtro.getCodigo() != null && !filtro.getCodigo().trim().isEmpty()) {
@@ -78,7 +73,6 @@ public class MedicamentoDao {
                 Medicamento m = read(filtro.getCodigo().trim());
                 resultado.add(m);
             } catch (Exception ex) {
-                // no existe
             }
             return resultado;
         }

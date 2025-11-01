@@ -22,7 +22,6 @@ public class Service {
     private final UsuarioDao usuarioDao;
 
     private Service() {
-        // inicializar DAOs (Database.instance() se crea dentro de los DAOs)
         medicoDao = new MedicoDao();
         pacienteDao = new PacienteDao();
         medicamentoDao = new MedicamentoDao();
@@ -158,7 +157,6 @@ public class Service {
 
     // =========== RECETAS ==============
     public void create(Receta e) throws Exception {
-        // crear receta y sus líneas en una transacción (si tu DAO soporta transaccionalidad)
         Database db = Database.instance();
         try {
             db.setAutoCommit(false);

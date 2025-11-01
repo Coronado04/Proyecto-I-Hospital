@@ -15,13 +15,12 @@ public class Worker implements Runnable {
     private final Service service;
     private ObjectOutputStream os;
     private ObjectInputStream is;
-    private String usuarioId; // ID del usuario logueado
+    private String usuarioId;
 
     private volatile boolean continuar = false;
     private Thread thread;
     private boolean esAsync = false;
 
-    // Bandera para evitar notificar logout varias veces
     private boolean loggedOutNotified = false;
 
 
@@ -31,14 +30,12 @@ public class Worker implements Runnable {
         this.service = service;
 
         try {
-            // Crear ObjectOutputStream primero y flush() para evitar deadlocks.
             this.os = new ObjectOutputStream(s.getOutputStream());
             this.os.flush();
             this.is = new ObjectInputStream(s.getInputStream());
         } catch (IOException ex) {
             System.err.println("Worker: error creando streams: " + ex.getMessage());
             ex.printStackTrace();
-            // No dejamos el worker en estado inconsistente: cerrar recursos y salir.
             closeSilently();
         }
     }
@@ -70,7 +67,6 @@ public class Worker implements Runnable {
                 try {
                     method = is.readInt();
                 } catch (EOFException eof) {
-                    // cliente cerró conexión de forma limpia -> avisar logout si corresponde y salir
                     System.out.println("Cliente cerró la conexión: " + s.getRemoteSocketAddress());
                     if (usuarioId != null && !loggedOutNotified) {
                         try {
@@ -618,8 +614,6 @@ public class Worker implements Runnable {
                                 String origen = (String) is.readObject();
                                 String destino = (String) is.readObject();
                                 String texto = (String) is.readObject();
-
-                                // Enviar SOLO al destinatario exacto (no al resto)
                                 boolean delivered = false;
                                 synchronized (srv.workers) {
                                     for (Worker w : srv.workers) {
@@ -630,15 +624,13 @@ public class Worker implements Runnable {
                                                 w.os.writeObject(texto);
                                                 w.os.flush();
                                                 delivered = true;
-                                                break; // un solo receptor esperado
+                                                break;
                                             } catch (IOException ioe) {
                                                 System.err.println("Error enviando mensaje a " + destino + ": " + ioe.getMessage());
                                             }
                                         }
                                     }
                                 }
-
-                                // Responder al emisor con estado (si quieres notificar envío correcto)
                                 os.writeInt(Protocol.ERROR_NO_ERROR);
                                 os.flush();
 
@@ -661,8 +653,6 @@ public class Worker implements Runnable {
                                 os.writeInt(Protocol.ERROR_NO_ERROR);
                                 os.flush();
                                 System.out.println("Listener asíncrono conectado: " + usuarioId);
-
-                                // Enviar al listener recién conectado la lista de usuarios ya logueados
                                 synchronized (srv.workers) {
                                     for (Worker w : srv.workers) {
                                         if (w != null && w.usuarioId != null) {
@@ -671,7 +661,6 @@ public class Worker implements Runnable {
                                                 os.writeObject(w.usuarioId);
                                                 os.flush();
                                             } catch (IOException ioe) {
-                                                // ignore: si falla escribir a este listener, no podemos hacer más
                                             }
                                         }
                                     }
@@ -685,17 +674,14 @@ public class Worker implements Runnable {
 
 
                         default:
-                            // opcode desconocido
                             os.writeInt(Protocol.ERROR_ERROR);
                             os.flush();
                             break;
-                    } // fin switch
+                    }
 
                 } catch (Exception outerEx) {
-                    // Capturamos excepciones de más alto nivel que puedan surgir
                     outerEx.printStackTrace();
                     safeWriteErrorAndFlush();
-                    // en este caso sí cerramos para evitar bucle infinito en fallos graves
                     System.out.println("Error crítico en Worker, cerrando conexión con " + s.getRemoteSocketAddress());
                     stop();
                     srv.remove(this);
@@ -706,7 +692,6 @@ public class Worker implements Runnable {
 
             t.printStackTrace();
         } finally {
-            // Asegurarnos de notificar logout si no se notificó antes (p. ej. cierre inesperado)
             try {
                 if (!loggedOutNotified && usuarioId != null) {
                     try {
@@ -717,8 +702,6 @@ public class Worker implements Runnable {
                     loggedOutNotified = true;
                 }
             } catch (Throwable ignored) {}
-
-            // Eliminar worker de la lista del servidor si aún está presente
             try {
                 srv.remove(this);
             } catch (Throwable ignored) {}

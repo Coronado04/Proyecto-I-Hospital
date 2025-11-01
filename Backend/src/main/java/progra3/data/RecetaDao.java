@@ -113,22 +113,13 @@ public class RecetaDao {
         }
     }
 
-    /**
-     * findByNombre ahora soporta:
-     * - filtro.getPaciente().getId()  -> búsqueda exacta por paciente id (r.paciente = ?)
-     * - filtro.getPaciente().getNombre() -> búsqueda por nombre (LIKE)
-     * - si no hay paciente en el filtro, devuelve todas las recetas
-     */
     public List<Receta> findByNombre(Receta filtro) {
         List<Receta> resultado = new ArrayList<>();
         try {
-            // SQL base con joins
             String sqlBase = "SELECT r.*, me.nombre AS me_nombre, pa.nombre AS pa_nombre " +
                     "FROM Receta r " +
                     "LEFT JOIN Medico me ON r.medico = me.id " +
                     "LEFT JOIN Paciente pa ON r.paciente = pa.id";
-
-            // Caso 1: búsqueda por patient id exacto
             if (filtro != null && filtro.getPaciente() != null) {
                 String pacienteId = filtro.getPaciente().getId();
                 String pacienteNombre = filtro.getPaciente().getNombre();
@@ -150,8 +141,6 @@ public class RecetaDao {
                     }
                     return resultado;
                 }
-
-                // Caso 2: búsqueda por nombre de paciente
                 if (pacienteNombre != null && !pacienteNombre.trim().isEmpty()) {
                     String sql = sqlBase + " WHERE pa.nombre LIKE ? ORDER BY r.fechaConfeccion DESC";
                     try (PreparedStatement stm = db.prepareStatement(sql)) {
@@ -170,8 +159,6 @@ public class RecetaDao {
                     return resultado;
                 }
             }
-
-            // Caso 3: no hay filtro de paciente -> devolver todas las recetas
             String sql = sqlBase + " ORDER BY r.fechaConfeccion DESC";
             try (PreparedStatement stm = db.prepareStatement(sql);
                  ResultSet rs = stm.executeQuery()) {
@@ -194,7 +181,6 @@ public class RecetaDao {
     private Receta from(ResultSet rs) throws SQLException {
         Receta r = new Receta();
 
-        // numero -> idReceta string en modelo
         int numero = rs.getInt("numero");
         r.setIdReceta(String.valueOf(numero));
 

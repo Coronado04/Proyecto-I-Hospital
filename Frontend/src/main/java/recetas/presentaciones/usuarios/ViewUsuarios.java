@@ -18,9 +18,7 @@ public class ViewUsuarios implements PropertyChangeListener {
     private Controller controller;
     private Model model;
 
-    // Supplier que devuelve el conjunto actual de ids con mensajes pendientes.
-    // El controller inyecta una lambda que devuelve su Set pendingIds.
-    private Supplier<Set<String>> pendingIdsSupplier = () -> java.util.Collections.emptySet();
+     private Supplier<Set<String>> pendingIdsSupplier = () -> java.util.Collections.emptySet();
 
     public JPanel getPanelExterno() {
         return panelExterno;
@@ -73,34 +71,23 @@ public class ViewUsuarios implements PropertyChangeListener {
         table1.setModel(new TableModel(cols, model.getList()));
         table1.setRowHeight(30);
 
-        // Aplicar renderer para primera columna (ID) que pinta azul si hay mensajes pendientes
         table1.getColumnModel().getColumn(0).setCellRenderer(new PendingRenderer());
         this.panelExterno.revalidate();
     }
 
-    /**
-     * Permite al controller inyectar un supplier que devuelva el conjunto actual de usuarios con mensajes pendientes.
-     * Llamar desde controller.setPendingIdsSupplier(...)
-     */
+
     public void setPendingIdsSupplier(Supplier<Set<String>> supplier) {
         this.pendingIdsSupplier = supplier != null ? supplier : () -> java.util.Collections.emptySet();
-        // refrescar renderizado
         if (table1 != null) {
             table1.getColumnModel().getColumn(0).setCellRenderer(new PendingRenderer());
             table1.repaint();
         }
     }
 
-    /**
-     * Forzar repintado externo (útil cuando controller modifica pendingIds)
-     */
     public void repaintTable() {
         if (table1 != null) table1.repaint();
     }
 
-    /**
-     * Renderer que marca en azul la celda del id cuando dicho id figura en pendingIdsSupplier.
-     */
     private class PendingRenderer extends DefaultTableCellRenderer {
         private final Color PENDING_BG = new Color(173, 216, 230); // light blue
 
@@ -115,7 +102,6 @@ public class ViewUsuarios implements PropertyChangeListener {
                 if (id != null && pending != null && pending.contains(id)) {
                     c.setBackground(isSelected ? c.getBackground() : PENDING_BG);
                 } else {
-                    // mantener selección por encima del color
                     if (isSelected) {
                         c.setBackground(table.getSelectionBackground());
                     } else {
@@ -123,8 +109,7 @@ public class ViewUsuarios implements PropertyChangeListener {
                     }
                 }
             } catch (Exception ex) {
-                // en caso de error, no romper la tabla: usar comportamiento por defecto
-                if (!isSelected) c.setBackground(table.getBackground());
+              if (!isSelected) c.setBackground(table.getBackground());
             }
             return c;
         }

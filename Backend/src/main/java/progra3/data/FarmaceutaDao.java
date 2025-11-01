@@ -66,9 +66,6 @@ public class FarmaceutaDao {
         }
     }
 
-    /**
-     * Soporta búsqueda por id EXACTA si se proporciona, o por nombre con LIKE si no.
-     */
     public List<Farmaceuta> findByNombre(Farmaceuta filtro) {
         List<Farmaceuta> resultado = new ArrayList<>();
 
